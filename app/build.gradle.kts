@@ -44,11 +44,12 @@ android {
 }
 
 dependencies {
+    implementation(libs.core.ktx)
     ///Room DB
     val room_version = "2.6.1"
 
     implementation("androidx.room:room-runtime:$room_version")
-
+    implementation("androidx.room:room-ktx:$room_version")
     // If this project uses any Kotlin source, use Kotlin Symbol Processing (KSP)
     ksp("androidx.room:room-compiler:$room_version")
 

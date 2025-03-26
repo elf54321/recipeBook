@@ -1,4 +1,4 @@
-package com.elte.recipebook.data
+package com.elte.recipebook.data.entities
 
 enum class TypeOfMeal {
     BREAKFAST,
