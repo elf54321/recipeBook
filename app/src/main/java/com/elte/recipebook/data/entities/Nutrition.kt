@@ -1,6 +1,11 @@
-package com.elte.recipebook.data
+package com.elte.recipebook.data.entities
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "nutrition")
 data class Nutrition (
+    @PrimaryKey
     val iD: Int,
     var energy: Double,
     var fat: Double,
