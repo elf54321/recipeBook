@@ -8,28 +8,12 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(
-    tableName = "recipe",
-    foreignKeys = [
-        ForeignKey(
-            entity = Nutrition::class,
-            parentColumns = ["iD"],
-            childColumns = ["nutritionId"],
-            onDelete = ForeignKey.CASCADE
-        )
-    ],
-    indices = [Index("nutritionId")]
-)
-data class Recipe (
-    @PrimaryKey
-    val iD: Int,
-    var name: String,
-    var source: String,
-    var instructions: String,
-    var portion: Double,
-    var typeOfMeal: TypeOfMeal,  // Use a converter for this enum
-    var priceCategory: String,
-    val nutritionId: Int         // references Nutrition.iD
+@Entity(tableName = "recipe")
+data class Recipe(
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    val name: String,
+    val description: String,
+    val imageUri: String? = null
 )
 
 //data class Recipe (

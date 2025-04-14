@@ -12,7 +12,7 @@ import androidx.room.PrimaryKey
     foreignKeys = [
         ForeignKey(
             entity = Recipe::class,
-            parentColumns = ["iD"],
+            parentColumns = ["id"],
             childColumns = ["recipeId"],
             onDelete = ForeignKey.CASCADE
         ),
@@ -33,7 +33,7 @@ import androidx.room.PrimaryKey
 )
 data class IngredientInformation (
     @PrimaryKey
-    val iD: Int,
+    val id: Int,
     val recipeId: Int,      // references Recipe.iD
     val ingredientId: Int,  // references Ingredient.iD
     var quantity: Double,

@@ -9,7 +9,7 @@ data class MealPlanWithRecipes(
     @Embedded val mealPlan: MealPlan,
     @Relation(
         parentColumn = "iD",
-        entityColumn = "iD",
+        entityColumn = "id",
         associateBy = Junction(
             value = MealPlanRecipeCrossRef::class,
             parentColumn = "mealPlanId",
