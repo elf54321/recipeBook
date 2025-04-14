@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.elte.recipebook.ui.components.FilterSection
+import androidx.compose.material.icons.filled.Tune
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -90,15 +91,13 @@ fun HomeScreen(modifier: Modifier = Modifier) {
                         .weight(1f)
                         .height(56.dp),
                     shape = RoundedCornerShape(50),
-                    colors = TextFieldDefaults.textFieldColors(
-                        containerColor = Color(0xFFF0F0F0),
-                        unfocusedIndicatorColor = Color.Transparent,
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color(0xFFF0F0F0),
+                        unfocusedContainerColor = Color(0xFFF0F0F0),
+                        disabledContainerColor = Color(0xFFF0F0F0),
                         focusedIndicatorColor = Color.Transparent,
-                        disabledIndicatorColor = Color.Transparent,
-                        focusedTextColor = Color.Black,
-                        unfocusedTextColor = Color.Black,
-                        focusedPlaceholderColor = Color.Gray,
-                        unfocusedPlaceholderColor = Color.Gray
+                        unfocusedIndicatorColor = Color.Transparent,
+                        disabledIndicatorColor = Color.Transparent
                     )
                 )
                 Spacer(Modifier.width(8.dp))

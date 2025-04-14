@@ -81,6 +81,10 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation("com.google.dagger:hilt-android:2.51.1")
     kapt("com.google.dagger:hilt-android-compiler:2.51.1")
+    implementation(libs.compose.material)
+    implementation(libs.compose.icons)
+    implementation("io.coil-kt:coil-compose:2.4.0")
+
 }
 
 kapt {
