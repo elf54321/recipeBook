@@ -6,6 +6,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.elte.recipebook.data.units.UnitInterface
 
 @Entity(
     tableName = "ingredient_information",
@@ -37,5 +38,5 @@ data class IngredientInformation (
     val recipeId: Int,      // references Recipe.iD
     val ingredientId: Int,  // references Ingredient.iD
     var quantity: Double,
-    val unitId: Int         // references UnitOfMeasure.iD
+    val unit: String // The conversion from uni to string happens in the View Model.
 )
