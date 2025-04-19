@@ -15,23 +15,31 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.elte.recipebook.data.entities.Recipe
 import com.elte.recipebook.viewModel.RecipeViewModel
 import com.elte.recipebook.ui.theme.SunnyYellow
 import com.elte.recipebook.ui.theme.SoftBackground
 import com.elte.recipebook.ui.theme.DeepText
+import androidx.core.net.toUri
 
 @Composable
-fun AddRecipeScreen(modifier: Modifier = Modifier, viewModel: RecipeViewModel = viewModel()) {
+fun AddRecipeScreen(
+    modifier: Modifier = Modifier,
+    viewModel: RecipeViewModel = hiltViewModel()
+) {
     val context = LocalContext.current
-    var name by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
-    var imageUri by remember { mutableStateOf<Uri?>(null) }
 
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-        imageUri = uri
+    // Observe state from ViewModel
+    val name = viewModel.name
+    val description = viewModel.description
+    val imageUriString = viewModel.imageUriString
+    val imageUri = imageUriString?.toUri()
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        viewModel.onImageSelected(uri)
     }
 
     Box(
@@ -56,10 +64,9 @@ fun AddRecipeScreen(modifier: Modifier = Modifier, viewModel: RecipeViewModel = 
                     color = DeepText,
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
-
                 OutlinedTextField(
                     value = name,
-                    onValueChange = { name = it },
+                    onValueChange = viewModel::onNameChange,
                     label = { Text("Recipe Name") },
                     shape = RoundedCornerShape(16.dp),
                     colors = TextFieldDefaults.colors(
@@ -72,10 +79,9 @@ fun AddRecipeScreen(modifier: Modifier = Modifier, viewModel: RecipeViewModel = 
                     ),
                     modifier = Modifier.fillMaxWidth()
                 )
-
                 OutlinedTextField(
                     value = description,
-                    onValueChange = { description = it },
+                    onValueChange = viewModel::onDescriptionChange,
                     label = { Text("Description") },
                     shape = RoundedCornerShape(16.dp),
                     colors = TextFieldDefaults.colors(
@@ -90,7 +96,6 @@ fun AddRecipeScreen(modifier: Modifier = Modifier, viewModel: RecipeViewModel = 
                         .fillMaxWidth()
                         .height(120.dp)
                 )
-
                 Button(
                     onClick = { launcher.launch("image/*") },
                     colors = ButtonDefaults.buttonColors(containerColor = SunnyYellow),
@@ -98,7 +103,6 @@ fun AddRecipeScreen(modifier: Modifier = Modifier, viewModel: RecipeViewModel = 
                 ) {
                     Text("Pick Photo", color = Color.Black)
                 }
-
                 imageUri?.let {
                     Image(
                         painter = rememberAsyncImagePainter(it),
@@ -110,18 +114,15 @@ fun AddRecipeScreen(modifier: Modifier = Modifier, viewModel: RecipeViewModel = 
                     )
                 }
             }
-
             Column(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Button(
                     onClick = {
-                        viewModel.insertRecipe()
-                        Toast.makeText(context, "Recipe Added", Toast.LENGTH_SHORT).show()
-                        name = ""
-                        description = ""
-                        imageUri = null
+                        viewModel.insertRecipe {
+                            Toast.makeText(context, "Recipe Added", Toast.LENGTH_SHORT).show()
+                        }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = SunnyYellow),
                     modifier = Modifier.fillMaxWidth()
