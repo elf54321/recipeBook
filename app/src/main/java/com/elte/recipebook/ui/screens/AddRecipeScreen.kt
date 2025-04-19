@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.elte.recipebook.data.entities.Recipe
-import com.elte.recipebook.viewmodel.RecipeViewModel
+import com.elte.recipebook.viewModel.RecipeViewModel
 import com.elte.recipebook.ui.theme.SunnyYellow
 import com.elte.recipebook.ui.theme.SoftBackground
 import com.elte.recipebook.ui.theme.DeepText
@@ -117,9 +117,7 @@ fun AddRecipeScreen(modifier: Modifier = Modifier, viewModel: RecipeViewModel = 
             ) {
                 Button(
                     onClick = {
-                        viewModel.insertRecipe(
-                            Recipe(name = name, description = description, imageUri = imageUri?.toString())
-                        )
+                        viewModel.insertRecipe()
                         Toast.makeText(context, "Recipe Added", Toast.LENGTH_SHORT).show()
                         name = ""
                         description = ""

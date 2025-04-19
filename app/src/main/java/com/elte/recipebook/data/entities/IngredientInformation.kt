@@ -22,15 +22,9 @@ import com.elte.recipebook.data.units.UnitInterface
             parentColumns = ["iD"],
             childColumns = ["ingredientId"],
             onDelete = ForeignKey.CASCADE
-        ),
-        ForeignKey(
-            entity = UnitOfMeasure::class,
-            parentColumns = ["iD"],
-            childColumns = ["unitId"],
-            onDelete = ForeignKey.CASCADE
         )
     ],
-    indices = [Index("recipeId"), Index("ingredientId"), Index("unitId")]
+    indices = [Index("recipeId"), Index("ingredientId")]
 )
 data class IngredientInformation (
     @PrimaryKey
