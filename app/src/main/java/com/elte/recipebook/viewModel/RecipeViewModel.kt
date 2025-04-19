@@ -8,7 +8,6 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 // Data classes
 import com.elte.recipebook.data.dao.RecipeDao
@@ -16,7 +15,10 @@ import com.elte.recipebook.data.entities.Recipe
 import com.elte.recipebook.data.TypeOfMeal
 import com.elte.recipebook.data.Equipment
 import com.elte.recipebook.data.PriceCategory
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
+@HiltViewModel
 class RecipeViewModel @Inject constructor(
     private val recipeDao: RecipeDao
 ) : ViewModel() {
@@ -109,4 +111,15 @@ class RecipeViewModel @Inject constructor(
             description = ""
             imageUri     = null
         }
+
+    var isTypeMenuExpanded by mutableStateOf(false)
+        private set
+    fun toggleTypeMenu() { isTypeMenuExpanded = !isTypeMenuExpanded }
+
+    var isPriceMenuExpanded by mutableStateOf(false)
+        private set
+    fun togglePriceMenu() { isPriceMenuExpanded = !isPriceMenuExpanded }
+
+    // Expose the image URI string:
+    val imageUriString: String? get() = imageUri
 }
