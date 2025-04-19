@@ -17,7 +17,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
-import com.elte.recipebook.viewModel.RecipeViewModel
+import com.elte.recipebook.viewModel.AddRecipeViewModel
 import com.elte.recipebook.ui.theme.SunnyYellow
 import com.elte.recipebook.ui.theme.SoftBackground
 import com.elte.recipebook.ui.theme.DeepText
@@ -26,7 +26,7 @@ import androidx.core.net.toUri
 @Composable
 fun AddRecipeScreen(
     modifier: Modifier = Modifier,
-    viewModel: RecipeViewModel = hiltViewModel()
+    viewModel: AddRecipeViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
 

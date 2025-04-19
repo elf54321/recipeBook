@@ -19,7 +19,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
-class RecipeViewModel @Inject constructor(
+class AddRecipeViewModel @Inject constructor(
     private val recipeDao: RecipeDao
 ) : ViewModel() {
 
