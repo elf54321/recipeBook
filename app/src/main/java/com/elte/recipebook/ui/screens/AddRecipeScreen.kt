@@ -117,13 +117,17 @@ fun AddRecipeScreen(modifier: Modifier = Modifier, viewModel: RecipeViewModel = 
             ) {
                 Button(
                     onClick = {
-                        viewModel.insertRecipe(
-                            Recipe(name = name, description = description, imageUri = imageUri?.toString())
-                        )
-                        Toast.makeText(context, "Recipe Added", Toast.LENGTH_SHORT).show()
-                        name = ""
-                        description = ""
-                        imageUri = null
+                        if (name.isNotBlank() && description.isNotBlank()) {
+                            viewModel.insertRecipe(
+                                Recipe(name = name, description = description, imageUri = imageUri?.toString())
+                            )
+                            Toast.makeText(context, "Recipe Added", Toast.LENGTH_SHORT).show()
+                            name = ""
+                            description = ""
+                            imageUri = null
+                        } else {
+                            Toast.makeText(context, "Please fill in all fields", Toast.LENGTH_SHORT).show()
+                        }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = SunnyYellow),
                     modifier = Modifier.fillMaxWidth()

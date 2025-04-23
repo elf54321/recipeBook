@@ -32,7 +32,7 @@ compose-material = { group = "androidx.compose.material", name = "material", ver
 compose-icons = { group = "androidx.compose.material", name = "material-icons-extended", version.ref = "compose-icons" }
 
 [plugins]
-android-application = { id = "com.android.application", version = "8.7.2" }
+android-application = { id = "com.android.application", version = "8.9.1" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 

@@ -84,7 +84,8 @@ dependencies {
     implementation(libs.compose.material)
     implementation(libs.compose.icons)
     implementation("io.coil-kt:coil-compose:2.4.0")
-
+    implementation("androidx.compose.runtime:runtime-livedata:1.6.4")
+    implementation("com.kizitonwose.calendar:compose:2.2.0")
 }
 
 kapt {
