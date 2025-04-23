@@ -20,6 +20,10 @@ interface MealPlanDao {
     suspend fun insertMealPlanRecipeCrossRef(mealPlanRecipeCrossRef: MealPlanRecipeCrossRef)
 
     @Transaction
+    @Query("SELECT * FROM meal_plan")
+    fun getMealPlansWithRecipes(): Flow<List<MealPlanWithRecipes>>
+
+    @Transaction
     @Query("SELECT * FROM meal_plan WHERE date = :date")
     fun getMealPlanWithRecipesForDate(date: Date): Flow<List<MealPlanWithRecipes>>
 
