@@ -120,8 +120,12 @@ fun AddRecipeScreen(
             ) {
                 Button(
                     onClick = {
-                        viewModel.insertRecipe {
-                            Toast.makeText(context, "Recipe Added", Toast.LENGTH_SHORT).show()
+                        if (name.isNotBlank() && description.isNotBlank()) {
+                            viewModel.insertRecipe {
+                                Toast.makeText(context, "Recipe Added", Toast.LENGTH_SHORT).show()
+                            }
+                        } else {
+                            Toast.makeText(context, "Please fill in all fields", Toast.LENGTH_SHORT).show()
                         }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = SunnyYellow),

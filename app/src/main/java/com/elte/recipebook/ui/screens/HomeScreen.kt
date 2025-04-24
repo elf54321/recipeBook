@@ -1,5 +1,6 @@
 package com.elte.recipebook.ui.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -12,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -20,13 +22,16 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.rememberAsyncImagePainter
 import com.elte.recipebook.ui.components.FilterSection
 import com.elte.recipebook.ui.theme.SoftBackground
 import com.elte.recipebook.ui.theme.SunnyYellow
+import com.elte.recipebook.viewModel.ShowAllRecipeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier) {
+fun HomeScreen(modifier: Modifier = Modifier, viewModel: ShowAllRecipeViewModel = viewModel()) {
     var searchQuery by remember { mutableStateOf(TextFieldValue("")) }
     var showFilterDialog by remember { mutableStateOf(false) }
     val filters = listOf(
@@ -34,19 +39,19 @@ fun HomeScreen(modifier: Modifier = Modifier) {
         "🆕 New", "💪 Healthy", "🍰 Dessert", "🥖 Low-Carb", "🚫 Gluten-Free"
     )
     var selectedFilter by remember { mutableStateOf("🍽 All") }
-    val recipes = listOf(
-        "🍝 Quick Pasta Delight",
-        "🥗 High-Protein Salad",
-        "🍲 15-min Vegan Stew",
-        "🍛 Low-Carb Curry",
-        "🥘 Grandma’s Goulash",
-        "🍜 Dorm-Friendly Ramen",
-        "🌮 Budget Taco Bowl",
-        "🍳 Protein-Packed Breakfast",
-        "🍰 Easy Healthy Dessert",
-        "🍕 Minimal-Ingredient Pizza"
-    )
-
+    /*val initialRecipes = listOf(
+        Recipe(name = "🍝 Quick Pasta Delight", description = "A fast and easy pasta dish."),
+        Recipe(name = "🥗 High-Protein Salad", description = "A nutritious and protein-rich salad."),
+        Recipe(name = "🍲 15-min Vegan Stew", description = "A quick and delicious vegan stew."),
+        Recipe(name = "🍛 Low-Carb Curry", description = "A flavorful low-carb curry."),
+        Recipe(name = "🥘 Grandma’s Goulash", description = "A comforting traditional goulash."),
+        Recipe(name = "🍜 Dorm-Friendly Ramen", description = "A simple and quick ramen recipe."),
+        Recipe(name = "🌮 Budget Taco Bowl", description = "An affordable and customizable taco bowl."),
+        Recipe(name = "🍳 Protein-Packed Breakfast", description = "A breakfast to fuel your day."),
+        Recipe(name = "🍰 Easy Healthy Dessert", description = "A guilt-free sweet treat."),
+        Recipe(name = "🍕 Minimal-Ingredient Pizza", description = "A simple pizza you can easily make.")
+    )*/
+    val recipes by viewModel.allRecipes.observeAsState(initial = emptyList())
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -125,14 +130,25 @@ fun HomeScreen(modifier: Modifier = Modifier) {
                         elevation = CardDefaults.cardElevation(4.dp)
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(150.dp)
-                                    .background(Color.LightGray)
-                            )
+                            recipe.imageUri?.let { uriString ->
+                                Image(
+                                    painter = rememberAsyncImagePainter(uriString),
+                                    contentDescription = "Recipe Image",
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(150.dp)
+                                )
+                            } ?: run {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(150.dp)
+                                        .background(Color.LightGray)
+                                )
+                            }
                             Spacer(Modifier.height(8.dp))
-                            Text(recipe, style = MaterialTheme.typography.titleMedium, color = Color.Black)
+                            Text(recipe.name, style = MaterialTheme.typography.titleMedium, color = Color.Black)
+                            Text(recipe.description, style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
                         }
                     }
                 }
