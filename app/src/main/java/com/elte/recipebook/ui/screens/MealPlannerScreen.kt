@@ -7,7 +7,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
@@ -15,13 +14,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.debugInspectorInfo
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.elte.recipebook.data.entities.Recipe
-import com.elte.recipebook.viewmodel.RecipeViewModel
+import com.elte.recipebook.viewModel.ShowAllRecipeViewModel
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.ZoneId
@@ -44,8 +41,8 @@ fun SavedScreen(modifier: Modifier = Modifier) {
 
 @Composable
 fun WeeklyMealPlannerView() {
-    val recipeViewModel: RecipeViewModel = viewModel()
-    val allRecipes by recipeViewModel.allRecipes.observeAsState(initial = emptyList())
+    val showAllRecipeViewModel: ShowAllRecipeViewModel = viewModel()
+    val allRecipes by showAllRecipeViewModel.allRecipes.observeAsState(initial = emptyList())
     val currentDate = remember { LocalDate.now() }
     var currentWeekStartDate by remember { mutableStateOf(currentDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))) }
     var selectedDay by remember { mutableStateOf<LocalDate?>(null) }
@@ -58,10 +55,10 @@ fun WeeklyMealPlannerView() {
         RecipeSelectionDialog(
             recipes = allRecipes,
             selectedDay = dayForNewMeal!!, // Pass selectedDay
-            recipeViewModel = recipeViewModel, // Pass recipeViewModel
+            showAllRecipeViewModel = showAllRecipeViewModel, // Pass recipeViewModel
             onRecipeSelected = { selectedRecipes ->
                 // Handle selected recipes and save them to the meal plan
-                recipeViewModel.addMealPlanForDate(dayForNewMeal!!.toDate(), selectedRecipes)
+                showAllRecipeViewModel.addMealPlanForDate(dayForNewMeal!!.toDate(), selectedRecipes)
                 showRecipeSelectionDialog = false // Close dialog
                 dayForNewMeal = null // Clear the day for the new meal
             },
@@ -74,7 +71,7 @@ fun WeeklyMealPlannerView() {
 
     // Check if a day is selected
     if (selectedDay != null) {
-        val mealsForDay by recipeViewModel.getMealPlanForDate(selectedDay!!.toDate()).observeAsState(emptyList())
+        val mealsForDay by showAllRecipeViewModel.getMealPlanForDate(selectedDay!!.toDate()).observeAsState(emptyList())
         DayMealPlanScreen(
             selectedDay = selectedDay!!,
             meals = mealsForDay.flatMap { it.recipes }, // Ensure meals are in a non-null list
@@ -83,7 +80,7 @@ fun WeeklyMealPlannerView() {
                 showRecipeSelectionDialog = true // Show the recipe selection dialog
             },
             onBack = { selectedDay = null },
-            recipeViewModel = recipeViewModel // Pass recipeViewModel here
+            showAllRecipeViewModel = showAllRecipeViewModel // Pass recipeViewModel here
         )
     } else {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -188,7 +185,7 @@ fun DayMealPlanScreen(
     meals: List<Recipe>,
     onAddMealClick: () -> Unit,
     onBack: () -> Unit,
-    recipeViewModel: RecipeViewModel
+    showAllRecipeViewModel: ShowAllRecipeViewModel
 ) {
     val context = LocalContext.current
     val currentDate = selectedDay.toDate() // Convert LocalDate to Date
@@ -197,11 +194,11 @@ fun DayMealPlanScreen(
 
     // Show Recipe Selection Dialog if required
     if (showRecipeSelectionDialog) {
-        recipeViewModel.allRecipes.value?.let {
+        showAllRecipeViewModel.allRecipes.value?.let {
             RecipeSelectionDialog(
                 recipes = it, // Get all recipes
                 selectedDay = selectedDay, // Pass selectedDay here
-                recipeViewModel = recipeViewModel, // Pass recipeViewModel
+                showAllRecipeViewModel = showAllRecipeViewModel, // Pass recipeViewModel
                 onRecipeSelected = { recipe -> selectedRecipes = selectedRecipes + recipe },
                 onDismiss = { showRecipeSelectionDialog = false }
             )
@@ -238,7 +235,7 @@ fun DayMealPlanScreen(
                 meals.forEach { recipe ->
                     MealItem(recipe = recipe, onRemoveClick = {
                         // Handle meal removal logic
-                        recipeViewModel.removeMealFromPlan(selectedDay.toDate(), recipe)
+                        showAllRecipeViewModel.removeMealFromPlan(selectedDay.toDate(), recipe)
                     })
                 }
             }
@@ -299,7 +296,7 @@ fun RecipeSelectionDialog(
     onRecipeSelected: (List<Recipe>) -> Unit,
     onDismiss: () -> Unit,
     selectedDay: LocalDate,
-    recipeViewModel: RecipeViewModel
+    showAllRecipeViewModel: ShowAllRecipeViewModel
 ) {
     // Track selected recipes
     val selectedRecipes = remember { mutableStateListOf<Recipe>() }
@@ -352,7 +349,7 @@ fun RecipeSelectionDialog(
             Button(
                 onClick = {
                     // Immediately save the selected recipes to the meal plan for the selected day
-                    recipeViewModel.addMealPlanForDate(selectedDay.toDate(), selectedRecipes)
+                    showAllRecipeViewModel.addMealPlanForDate(selectedDay.toDate(), selectedRecipes)
                     onRecipeSelected(selectedRecipes) // Optional: Pass the selected recipes back if needed
                     onDismiss()  // Dismiss the dialog
                 }

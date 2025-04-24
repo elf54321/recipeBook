@@ -1,4 +1,4 @@
-package com.elte.recipebook.viewmodel
+package com.elte.recipebook.viewModel
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
@@ -13,17 +13,11 @@ import com.elte.recipebook.data.entities.Recipe
 import kotlinx.coroutines.launch
 import java.util.Date
 
-class RecipeViewModel(application: Application) : AndroidViewModel(application) {
+class ShowAllRecipeViewModel(application: Application) : AndroidViewModel(application) {
     private val mealPlanDao = AppDatabase.getDatabase(application).mealPlanDao()
     private val recipeDao = AppDatabase.getDatabase(application).recipeDao()
 
     val allRecipes: LiveData<List<Recipe>> = recipeDao.getAllRecipes().asLiveData()
-
-    fun insertRecipe(recipe: Recipe) {
-        viewModelScope.launch {
-            recipeDao.insert(recipe)
-        }
-    }
 
     fun addMealPlanForDate(date: Date, recipes: List<Recipe>, comment: String = "") {
         viewModelScope.launch {

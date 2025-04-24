@@ -24,15 +24,14 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
-import com.elte.recipebook.data.entities.Recipe
 import com.elte.recipebook.ui.components.FilterSection
 import com.elte.recipebook.ui.theme.SoftBackground
 import com.elte.recipebook.ui.theme.SunnyYellow
-import com.elte.recipebook.viewmodel.RecipeViewModel
+import com.elte.recipebook.viewModel.ShowAllRecipeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier, viewModel: RecipeViewModel = viewModel()) {
+fun HomeScreen(modifier: Modifier = Modifier, viewModel: ShowAllRecipeViewModel = viewModel()) {
     var searchQuery by remember { mutableStateOf(TextFieldValue("")) }
     var showFilterDialog by remember { mutableStateOf(false) }
     val filters = listOf(
