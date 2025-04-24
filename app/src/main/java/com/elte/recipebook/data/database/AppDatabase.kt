@@ -12,13 +12,12 @@ import com.elte.recipebook.data.entities.*
     entities = [
         Nutrition::class,
         Ingredient::class,
-        UnitOfMeasure::class,
         Recipe::class,
         IngredientInformation::class,
         MealPlan::class,
         MealPlanRecipeCrossRef::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -31,7 +30,6 @@ abstract class AppDatabase : RoomDatabase() {
 
     // NEW DAOs
     abstract fun nutritionDao(): NutritionDao
-    abstract fun unitOfMeasureDao(): UnitOfMeasureDao
 
     companion object {
         @Volatile

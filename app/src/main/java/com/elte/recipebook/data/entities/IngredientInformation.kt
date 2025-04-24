@@ -6,6 +6,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.elte.recipebook.data.units.UnitInterface
 
 @Entity(
     tableName = "ingredient_information",
@@ -21,15 +22,9 @@ import androidx.room.PrimaryKey
             parentColumns = ["iD"],
             childColumns = ["ingredientId"],
             onDelete = ForeignKey.CASCADE
-        ),
-        ForeignKey(
-            entity = UnitOfMeasure::class,
-            parentColumns = ["iD"],
-            childColumns = ["unitId"],
-            onDelete = ForeignKey.CASCADE
         )
     ],
-    indices = [Index("recipeId"), Index("ingredientId"), Index("unitId")]
+    indices = [Index("recipeId"), Index("ingredientId")]
 )
 data class IngredientInformation (
     @PrimaryKey
@@ -37,5 +32,5 @@ data class IngredientInformation (
     val recipeId: Int,      // references Recipe.iD
     val ingredientId: Int,  // references Ingredient.iD
     var quantity: Double,
-    val unitId: Int         // references UnitOfMeasure.iD
+    val unit: String // The conversion from uni to string happens in the View Model.
 )

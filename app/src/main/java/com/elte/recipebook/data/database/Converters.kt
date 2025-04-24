@@ -1,7 +1,7 @@
 package com.elte.recipebook.data.database
 
 import androidx.room.TypeConverter
-import com.elte.recipebook.data.entities.TypeOfMeal
+import com.elte.recipebook.data.TypeOfMeal
 import java.util.Date
 
 class Converters {

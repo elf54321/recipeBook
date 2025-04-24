@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey
 data class Nutrition (
     @PrimaryKey
     val iD: Int,
-    var energy: Double,
+    var energy: Int,
     var fat: Double,
     var protein: Double,
     var carbohydrate: Double,
