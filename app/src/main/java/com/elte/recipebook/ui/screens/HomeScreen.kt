@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.elte.recipebook.ui.components.FilterSection
 import com.elte.recipebook.ui.theme.SoftBackground
@@ -31,7 +32,7 @@ import com.elte.recipebook.viewModel.ShowAllRecipeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier, viewModel: ShowAllRecipeViewModel = viewModel()) {
+fun HomeScreen(navController: NavController, modifier: Modifier = Modifier, viewModel: ShowAllRecipeViewModel = viewModel()) {
     var searchQuery by remember { mutableStateOf(TextFieldValue("")) }
     var showFilterDialog by remember { mutableStateOf(false) }
     val filters = listOf(
@@ -125,7 +126,10 @@ fun HomeScreen(modifier: Modifier = Modifier, viewModel: ShowAllRecipeViewModel 
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 8.dp),
+                            .padding(vertical = 8.dp)
+                            .clickable {
+                                navController.navigate("recipe/${recipe.id}")
+                            },
                         colors = CardDefaults.cardColors(containerColor = Color.White),
                         elevation = CardDefaults.cardElevation(4.dp)
                     ) {
