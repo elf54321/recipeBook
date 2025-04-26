@@ -28,12 +28,15 @@ fun OneRecipeScreen(
     recipeId: Int,
     navigateToRoute: (String) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: OneRecipeViewModel = viewModel()
+    viewModel: OneRecipeViewModel = viewModel(key = "recipe_$recipeId")
 ) {
-    val recipe by viewModel.getRecipeById(recipeId).observeAsState()
+    val recipe by viewModel.recipe.observeAsState()
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
+    LaunchedEffect(recipeId) {
+        viewModel.getRecipeById(recipeId)
+    }
     var showDeleteDialog by remember { mutableStateOf(false) }
 
     Box(
@@ -43,23 +46,24 @@ fun OneRecipeScreen(
     ) {
         recipe?.let {
             Box(modifier = Modifier.fillMaxSize()) {
+
+                IconButton(
+                    onClick = { showDeleteDialog = true },
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Delete Recipe",
+                        tint = Color.Black
+                    )
+                }
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                     modifier = Modifier.fillMaxSize()
+                        .padding(top = 56.dp)
                 ) {
-                    IconButton(
-                        onClick = {
-                            showDeleteDialog = true
-                        },
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = "Delete Recipe",
-                            tint = Color.Black
-                        )
-                    }
-
                     if (it.imageUri != null) {
                         Image(
                             painter = rememberAsyncImagePainter(it.imageUri.toUri()),

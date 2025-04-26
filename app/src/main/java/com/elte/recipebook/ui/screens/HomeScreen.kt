@@ -24,6 +24,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
+import com.elte.recipebook.data.entities.Recipe
 import com.elte.recipebook.ui.components.FilterSection
 import com.elte.recipebook.ui.theme.SoftBackground
 import com.elte.recipebook.ui.theme.SunnyYellow
@@ -51,7 +52,11 @@ fun HomeScreen(navigateToRoute: (String) -> Unit, modifier: Modifier = Modifier,
         Recipe(name = "🍰 Easy Healthy Dessert", description = "A guilt-free sweet treat."),
         Recipe(name = "🍕 Minimal-Ingredient Pizza", description = "A simple pizza you can easily make.")
     )*/
-    val recipes by viewModel.allRecipes.observeAsState(initial = emptyList())
+    val recipes: List<Recipe> by viewModel.allRecipes.observeAsState(emptyList())
+
+    LaunchedEffect(Unit) {
+        viewModel.getAllRecipe()
+    }
     Box(
         modifier = modifier
             .fillMaxSize()

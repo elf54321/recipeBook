@@ -3,6 +3,7 @@ package com.elte.recipebook.viewModel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.elte.recipebook.data.database.AppDatabase
@@ -17,7 +18,14 @@ class ShowAllRecipeViewModel(application: Application) : AndroidViewModel(applic
     private val mealPlanDao = AppDatabase.getDatabase(application).mealPlanDao()
     private val recipeDao = AppDatabase.getDatabase(application).recipeDao()
 
-    val allRecipes: LiveData<List<Recipe>> = recipeDao.getAllRecipes().asLiveData()
+    private val _recipes = MutableLiveData<List<Recipe>>()
+    val allRecipes: LiveData<List<Recipe>> = _recipes
+    fun getAllRecipe() {
+        viewModelScope.launch {
+            val fetchedRecipe = recipeDao.getAllRecipes()
+            _recipes.postValue(fetchedRecipe)
+        }
+    }
 
     fun addMealPlanForDate(date: Date, recipes: List<Recipe>, comment: String = "") {
         viewModelScope.launch {
