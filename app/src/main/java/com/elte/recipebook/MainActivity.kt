@@ -14,6 +14,8 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -21,10 +23,19 @@ class MainActivity : ComponentActivity() {
             val currentBackStack = navController.currentBackStackEntryAsState()
             val currentRoute = currentBackStack.value?.destination?.route
 
+            val navigateToRoute: (String) -> Unit = { route ->
+                navController.navigate(route) {
+                    popUpTo(navController.graph.startDestinationId) {
+                        saveState = true
+                    }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            }
             Scaffold(
                 bottomBar = { BottomNavBar(navController, currentRoute) }
             ) { padding ->
-                RecipeNavGraph(navController = navController, modifier = Modifier.padding(padding))
+                RecipeNavGraph(navController = navController, modifier = Modifier.padding(padding), navigateToRoute)
             }
         }
     }

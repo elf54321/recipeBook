@@ -8,12 +8,17 @@ import androidx.navigation.compose.composable
 import com.elte.recipebook.ui.screens.*
 
 @Composable
-fun RecipeNavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
+fun RecipeNavGraph(navController: NavHostController, modifier: Modifier = Modifier, navigateToRoute: (String) -> Unit) {
     NavHost(navController = navController, startDestination = "home") {
-        composable("home") { HomeScreen(modifier) }
+        composable("home") { HomeScreen(navigateToRoute, modifier) }
         composable("saved") { SavedScreen(modifier) }
         composable("add") { AddRecipeScreen(modifier) }
         composable("grocery") { GroceryScreen(modifier) }
-        composable("profile") { ProfileScreen(modifier) }
+        composable("recipe/{recipeId}") { backStackEntry ->
+            val recipeId = backStackEntry.arguments?.getString("recipeId")?.toIntOrNull()
+            if (recipeId != null) {
+                OneRecipeScreen(recipeId = recipeId, modifier)
+            }
+        }
     }
 }

@@ -15,17 +15,24 @@ val bottomNavItems = listOf(
     BottomNavItem("saved", Icons.Default.Favorite, "Saved"),
     BottomNavItem("add", Icons.Default.Add, "Add"),
     BottomNavItem("grocery", Icons.Default.ShoppingCart, "Grocery"),
-    BottomNavItem("profile", Icons.Default.Person, "Profile")
+    BottomNavItem("recipe/{recipeId}", Icons.Default.Receipt, "Recipe")
 )
+
+fun String.matchesBaseRoute(route: String): Boolean {
+    return this.startsWith(route.substringBefore("/{"))
+}
+
 
 @Composable
 fun BottomNavBar(navController: NavHostController, currentRoute: String?) {
+
     NavigationBar(containerColor = Color.White) {
         bottomNavItems.forEach { item ->
             NavigationBarItem(
                 icon = { Icon(item.icon, contentDescription = null, tint = Color.Black) },
                 label = { Text(item.label, color = Color.Black) },
-                selected = currentRoute == item.route,
+                selected = currentRoute?.matchesBaseRoute(item.route) == true,
+                //selected = currentRoute == item.route,
                 onClick = {
                     if (currentRoute != item.route) {
                         navController.navigate(item.route) {
