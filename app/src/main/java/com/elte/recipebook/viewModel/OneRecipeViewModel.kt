@@ -13,4 +13,8 @@ class OneRecipeViewModel(application: Application) : AndroidViewModel(applicatio
     fun getRecipeById(id: Int): LiveData<Recipe> {
         return recipeDao.getRecipeById(id).asLiveData()
     }
+
+    suspend fun deleteRecipeById(id: Int) {
+        recipeDao.deleteRecipeById(id)
+    }
 }
