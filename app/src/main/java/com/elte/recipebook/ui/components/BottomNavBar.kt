@@ -14,6 +14,7 @@ val bottomNavItems = listOf(
     BottomNavItem("home", Icons.Default.Home, "Home"),
     BottomNavItem("saved", Icons.Default.Favorite, "Saved"),
     BottomNavItem("add", Icons.Default.Add, "Add"),
+    BottomNavItem("ocr", Icons.Default.Add, "OCR"),
     BottomNavItem("grocery", Icons.Default.ShoppingCart, "Grocery"),
     BottomNavItem("recipe/{recipeId}", Icons.Default.Receipt, "Recipe")
 )
