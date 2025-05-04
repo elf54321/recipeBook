@@ -18,6 +18,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.elte.recipebook.data.entities.Recipe
+import com.elte.recipebook.ui.theme.DeepText
+import com.elte.recipebook.ui.theme.SoftBackground
 import com.elte.recipebook.viewModel.ShowAllRecipeViewModel
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -25,14 +27,22 @@ import java.time.ZoneId
 import java.time.temporal.TemporalAdjusters
 import java.time.format.DateTimeFormatter
 import java.util.Date
+import com.elte.recipebook.ui.theme.SoftBackground
+import com.elte.recipebook.ui.theme.SunnyYellow
 
 @Composable
 fun SavedScreen(modifier: Modifier = Modifier) {
-    Column(modifier = modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(SoftBackground),
+        horizontalAlignment = Alignment.CenterHorizontally
+    )
+    {
         Text(
             "Weekly Meal Planner",
             style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.onBackground,
+            color = DeepText,
             modifier = Modifier.padding(16.dp)
         )
         WeeklyMealPlannerView ()
@@ -116,16 +126,22 @@ fun WeekNavigation(
             .fillMaxWidth()
             .padding(8.dp)
     ) {
-        Button(onClick = onPreviousWeek) {
-            Text("<")
+        Button(
+            onClick = onPreviousWeek,
+            colors = ButtonDefaults.buttonColors(containerColor = SunnyYellow)
+        ) {
+            Text("<", color = Color.Black)
         }
         Text(
             text = "${formatter.format(currentWeekStartDate)} - ${formatter.format(weekEndDate)}",
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onBackground
         )
-        Button(onClick = onNextWeek) {
-            Text(">")
+        Button(
+            onClick = onNextWeek,
+            colors = ButtonDefaults.buttonColors(containerColor = SunnyYellow)
+        ) {
+            Text(">", color = Color.Black)
         }
     }
 }
@@ -166,8 +182,7 @@ fun DaySelectorItem(day: LocalDate, onDayClick: (LocalDate) -> Unit, modifier: M
     Column(
         modifier = modifier
             .padding(horizontal = 4.dp, vertical = 8.dp)
-            .background(MaterialTheme.colorScheme.surfaceVariant, shape = MaterialTheme.shapes.small)
-            .clickable { onDayClick(day) }
+            .background(SunnyYellow, shape = MaterialTheme.shapes.small)            .clickable { onDayClick(day) }
             .padding(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -216,8 +231,11 @@ fun DayMealPlanScreen(
             .padding(16.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Button(onClick = onBack) {
-                Text("Back")
+            Button(
+                onClick = onBack,
+                colors = ButtonDefaults.buttonColors(containerColor = SunnyYellow)
+            ) {
+                Text("Back", color = Color.Black)
             }
             Spacer(modifier = Modifier.width(16.dp))
             Text(
@@ -249,14 +267,12 @@ fun DayMealPlanScreen(
 
         // Button to add meals
         Button(
-            onClick = {
-                // Show recipe selection dialog when button is clicked
-                showRecipeSelectionDialog = true
-            },
-            modifier = Modifier.fillMaxWidth()
+            onClick = { showRecipeSelectionDialog = true },
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(containerColor = SunnyYellow)
         ) {
-            Icon(Icons.Filled.Add, contentDescription = "Add meal")
-            Text("Add Meal")
+            Icon(Icons.Filled.Add, contentDescription = "Add meal", tint = Color.Black)
+            Text("Add Meal", color = Color.Black)
         }
     }
 }
@@ -352,18 +368,21 @@ fun RecipeSelectionDialog(
         confirmButton = {
             Button(
                 onClick = {
-                    // Immediately save the selected recipes to the meal plan for the selected day
                     showAllRecipeViewModel.addMealPlanForDate(selectedDay.toDate(), selectedRecipes)
-                    onRecipeSelected(selectedRecipes) // Optional: Pass the selected recipes back if needed
-                    onDismiss()  // Dismiss the dialog
-                }
+                    onRecipeSelected(selectedRecipes)
+                    onDismiss()
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = SunnyYellow)
             ) {
-                Text("Add Meals")
+                Text("Add Meals", color = Color.Black)
             }
         },
         dismissButton = {
-            Button(onClick = onDismiss) {
-                Text("Cancel")
+            Button(
+                onClick = onDismiss,
+                colors = ButtonDefaults.buttonColors(containerColor = SunnyYellow)
+            ) {
+                Text("Cancel", color = Color.Black)
             }
         }
     )
