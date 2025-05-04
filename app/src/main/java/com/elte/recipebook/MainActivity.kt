@@ -29,7 +29,7 @@ class MainActivity : ComponentActivity() {
                         saveState = true
                     }
                     launchSingleTop = true
-                    restoreState = true
+                    restoreState = false
                 }
             }
             Scaffold(

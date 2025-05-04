@@ -17,7 +17,7 @@ fun RecipeNavGraph(navController: NavHostController, modifier: Modifier = Modifi
         composable("recipe/{recipeId}") { backStackEntry ->
             val recipeId = backStackEntry.arguments?.getString("recipeId")?.toIntOrNull()
             if (recipeId != null) {
-                OneRecipeScreen(recipeId = recipeId, modifier)
+                OneRecipeScreen(recipeId = recipeId, navigateToRoute, modifier)
             }
         }
     }
