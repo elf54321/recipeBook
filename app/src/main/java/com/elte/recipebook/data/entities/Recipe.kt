@@ -20,7 +20,7 @@ data class Recipe (
     val iD: Int,
     var ingredients: List<IngredientInformation>,
     var name: String,
-    var source: String,
+    val imageUri: String? = null,
     var instructions: String,
     var portion: Double,
     var typeOfMeal: Enum<TypeOfMeal>,

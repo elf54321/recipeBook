@@ -11,6 +11,7 @@ composeBom = "2024.09.00"
 coreKtxVersion = "1.6.1"
 compose-material = "1.6.5"
 compose-icons = "1.6.5"
+runtimeLivedata = "1.8.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -30,6 +31,7 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 core-ktx = { group = "androidx.test", name = "core-ktx", version.ref = "coreKtxVersion" }
 compose-material = { group = "androidx.compose.material", name = "material", version.ref = "compose-material" }
 compose-icons = { group = "androidx.compose.material", name = "material-icons-extended", version.ref = "compose-icons" }
+androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtimeLivedata" }
 
 [plugins]
 android-application = { id = "com.android.application", version = "8.7.2" }

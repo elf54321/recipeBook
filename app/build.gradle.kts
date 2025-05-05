@@ -45,6 +45,7 @@ android {
 
 dependencies {
     implementation(libs.core.ktx)
+    implementation(libs.androidx.runtime.livedata)
     ///Room DB
     val room_version = "2.6.1"
 
@@ -85,10 +86,15 @@ dependencies {
     implementation(libs.compose.material)
     implementation(libs.compose.icons)
     implementation("io.coil-kt:coil-compose:2.4.0")
-    implementation("androidx.compose.runtime:runtime-livedata:1.6.4")
     implementation("com.kizitonwose.calendar:compose:2.2.0")
     implementation("com.google.mlkit:text-recognition:16.0.1")
     implementation("io.github.mr0xf00:easycrop:0.1.1")
+
+    // Live Data runtime
+    implementation("androidx.compose.runtime:runtime:1.8.0")
+    implementation("androidx.compose.runtime:runtime-livedata:1.8.0")
+    implementation("androidx.compose.runtime:runtime-rxjava2:1.8.0")
+
 }
 
 kapt {

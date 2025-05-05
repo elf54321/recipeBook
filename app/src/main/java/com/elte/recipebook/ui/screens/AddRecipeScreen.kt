@@ -1,5 +1,6 @@
 package com.elte.recipebook.ui.screens
 
+import android.annotation.SuppressLint
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -22,12 +23,20 @@ import com.elte.recipebook.ui.theme.SunnyYellow
 import com.elte.recipebook.ui.theme.SoftBackground
 import com.elte.recipebook.ui.theme.DeepText
 import androidx.core.net.toUri
+import androidx.navigation.NavHostController
 
+@SuppressLint("UnrememberedGetBackStackEntry")
 @Composable
 fun AddRecipeScreen(
     modifier: Modifier = Modifier,
-    viewModel: AddRecipeViewModel = hiltViewModel()
+    navigateToStep: () -> Unit,
+    navController: NavHostController
 ) {
+    // scope ViewModel to the "add" entry
+    val parentEntry = remember(navController.getBackStackEntry("add")) {
+        navController.getBackStackEntry("add")
+    }
+    val viewModel: AddRecipeViewModel = hiltViewModel(parentEntry)
     val context = LocalContext.current
 
     // Observe state from ViewModel
@@ -118,21 +127,17 @@ fun AddRecipeScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Button(
-                    onClick = {
-                        if (name.isNotBlank() && description.isNotBlank()) {
-                            viewModel.insertRecipe {
-                                Toast.makeText(context, "Recipe Added", Toast.LENGTH_SHORT).show()
-                            }
-                        } else {
-                            Toast.makeText(context, "Please fill in all fields", Toast.LENGTH_SHORT).show()
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = SunnyYellow),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Save Recipe", color = Color.Black)
-                }
+                   Button(
+                         onClick = {
+                               if (name.isNotBlank() && description.isNotBlank()) {
+                                    navController.navigate("add/details")
+                                   }
+                                    else {
+                                         Toast.makeText(context, "Please fill in all fields", Toast.LENGTH_SHORT).show()
+                                       }
+                                   },
+                         colors = ButtonDefaults.buttonColors(containerColor = SunnyYellow),
+                         modifier = Modifier.fillMaxWidth()) { Text("Next", color = Color.Black) }
             }
         }
     }
