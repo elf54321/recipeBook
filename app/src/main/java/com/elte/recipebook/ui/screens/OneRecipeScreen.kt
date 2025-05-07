@@ -111,8 +111,8 @@ fun OneRecipeScreen(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                Text("1", modifier = Modifier.weight(1f)) // Replace with actual quantity if you store it
-                                Text(ingredient.priceCurrency, modifier = Modifier.weight(1f)) // Unit placeholder
+                                Text(ingredient.price.toString(), modifier = Modifier.weight(1f)) // Replace with actual quantity
+                                Text(ingredient.priceCurrency, modifier = Modifier.weight(1f)) // Replace with unit
                                 Text(ingredient.name, modifier = Modifier.weight(2f))
                                 IconButton(onClick = { showInfo = true }) {
                                     Icon(Icons.Default.Info, contentDescription = "Nutritional Info")

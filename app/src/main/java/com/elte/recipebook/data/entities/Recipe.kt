@@ -13,8 +13,7 @@ data class Recipe(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val name: String,
     val description: String,
-    val imageUri: String? = null,
-
+    val imageUri: String? = null
 )
 /*
 data class Recipe (
