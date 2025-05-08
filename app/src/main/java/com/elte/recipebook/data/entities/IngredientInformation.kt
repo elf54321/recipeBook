@@ -26,6 +26,10 @@ import com.elte.recipebook.data.units.UnitInterface
     ],
     indices = [Index("recipeId"), Index("ingredientId")]
 )
+// This data class represents how much ingredient(different table),
+// should be added to a unique recipe(created by a user).
+// It also represents what kind of unit of measurment was used
+// during the creation of the recipie.
 data class IngredientInformation (
     @PrimaryKey
     val id: Int,

@@ -20,13 +20,17 @@ import androidx.room.PrimaryKey
             onDelete = ForeignKey.CASCADE
         )
     ],
-    indices = [Index("nutritionId")]
+    indices = [
+        Index("nutritionId"),
+       // Index(value = ["name"], unique = true)  // <- enforcing unique ingredients
+    ]
 )
+// Info about a unique ingredient.
 data class Ingredient (
     @PrimaryKey
     val iD: Int,
     var name: String,
-    var price: Double,
-    var priceCurrency: String,
+    var price: Double, // How much does a unit cost from this Ingredient. (kg,piece,package...)
+    var priceCurrency: String, // Auto-fill based on region/location data.
     val nutritionId: Int  // references Nutrition.iD
 )

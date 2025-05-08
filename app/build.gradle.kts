@@ -46,6 +46,7 @@ android {
 dependencies {
     implementation(libs.core.ktx)
     implementation(libs.androidx.runtime.livedata)
+    implementation(libs.material)
     ///Room DB
     val room_version = "2.6.1"
 

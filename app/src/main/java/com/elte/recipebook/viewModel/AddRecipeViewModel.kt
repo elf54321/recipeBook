@@ -16,12 +16,21 @@ import com.elte.recipebook.data.TypeOfMeal
 import com.elte.recipebook.data.Equipment
 import com.elte.recipebook.data.PriceCategory
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import javax.inject.Inject
 
 @HiltViewModel
 class AddRecipeViewModel @Inject constructor(
     private val recipeDao: RecipeDao
 ) : ViewModel() {
+    // Event channel
+    private val _eventFlow = MutableSharedFlow<UIEvent>()
+    val eventFlow = _eventFlow.asSharedFlow()
+
+    sealed class UIEvent {
+        data class ShowSnackbar(val message: String): UIEvent()
+    }
 
     // — UI state, backed by Compose’s mutableStateOf
         var name by mutableStateOf("")
@@ -66,8 +75,14 @@ class AddRecipeViewModel @Inject constructor(
         }
 
         fun toggleEquipment(eq: Equipment) {
-            if (_selectedEquipment.contains(eq)) _selectedEquipment.remove(eq)
-            else                                 _selectedEquipment.add(eq)
+            if (_selectedEquipment.contains(eq)) {
+                _selectedEquipment.remove(eq)
+            } else if (_selectedEquipment.size < 12) {
+                _selectedEquipment.add(eq)
+                viewModelScope.launch {
+                    _eventFlow.emit(UIEvent.ShowSnackbar("Maximum 12 Equipment is allowed!"))
+                }
+            }
         }
 
         fun onPriceCategorySelected(pc: PriceCategory) {
