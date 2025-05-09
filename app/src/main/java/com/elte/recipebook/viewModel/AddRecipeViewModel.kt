@@ -10,15 +10,20 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 
 // Data classes
-import com.elte.recipebook.data.dao.RecipeDao
-import com.elte.recipebook.data.entities.Recipe
+    //Entities
+    import com.elte.recipebook.data.entities.RecipeIngredientCrossRef
+    import com.elte.recipebook.data.entities.Recipe
+    import com.elte.recipebook.data.entities.Ingredient
+    import com.elte.recipebook.data.entities.Nutrition
+
+    // Daos, DataAccessObject
+    import com.elte.recipebook.data.dao.RecipeDao
+    import com.elte.recipebook.data.dao.IngredientDao
+    import com.elte.recipebook.data.dao.NutritionDao
+
 import com.elte.recipebook.data.TypeOfMeal
 import com.elte.recipebook.data.Equipment
 import com.elte.recipebook.data.PriceCategory
-import com.elte.recipebook.data.dao.IngredientDao
-import com.elte.recipebook.data.dao.NutritionDao
-import com.elte.recipebook.data.entities.Ingredient
-import com.elte.recipebook.data.entities.Nutrition
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -65,13 +70,6 @@ class AddRecipeViewModel @Inject constructor(
             fun onNameChange(new: String)         { name = new }
             fun onDescriptionChange(new: String) { description = new }
             fun onImageSelected(uri: Uri?) { imageUri = uri?.toString() }
-
-            private fun resetForm() {
-                name         = ""
-                description = ""
-                imageUri     = null
-            }
-
 
         ////////// AddRecipeDetailScreen(2nd) //////////
         // Backing state (private) + public getters for dropdowns
@@ -130,7 +128,8 @@ class AddRecipeViewModel @Inject constructor(
 
         // SnapshotStateList for the ones the user has tapped
         private val _selectedIngredients = mutableStateListOf<Ingredient>()
-        val selectedIngredients: List<Ingredient> = _selectedIngredients
+        val selectedIngredients: List<Ingredient>
+            get() = _selectedIngredients
 
         init {
             // Kick off collecting the ingredient list
@@ -152,23 +151,53 @@ class AddRecipeViewModel @Inject constructor(
         }
     // Creating a new recipe in the database
     fun insertRecipe(onSuccess: () -> Unit = {}) {
-        // Validation
+        // 1) Basic validation
         if (name.isBlank()) return
 
-        val newRecipe = Recipe(
-            name         = name.trim(),
-            description = description.trim(),
-            imageUri     = imageUri,
-        )
-
         viewModelScope.launch {
-            recipeDao.insert(newRecipe)
+            // 2) Parse the portion
+            val portionValue = portionText.toDoubleOrNull() ?: 1.0
+
+            // 3) Recipe entity
+            val newRecipe = Recipe(
+                name          = name,
+                description   = description,
+                imageUri      = imageUriString,
+                source        = "AddedByUser",
+                portion       = portionValue,
+                typeOfMeal    = selectedType,
+                priceCategory = selectedPriceCategory,
+                equipment     = selectedEquipment.toTypedArray()
+                // convert List→Array
+                // nutrition id is not part of the db currently
+            )
+
+            // 4) Insert and grab the generated ID
+            val recipeId = recipeDao.insert(newRecipe).toInt()
+
+            // 5) Populate the junction table
+            selectedIngredients.forEach { ing ->
+                recipeDao.insertRecipeIngredientCrossRef(
+                    RecipeIngredientCrossRef(
+                        recipeId       = recipeId,
+                        ingredientId   = ing.id        // your Ingredient primary key
+                    )
+                )
+            }
+
+            // 6) Reset form & call success callback
             resetForm()
             onSuccess()
         }
     }
+    private fun resetForm() {
+        name         = ""
+        description  = ""
+        imageUri     = null
+        _selectedIngredients.clear()
+    }
     // --------------------------------------------------------------------------//
-    //                          Nutrition Part                                   //
+    //                        Ingredient - Nutrition Part                        //
     // --------------------------------------------------------------------------//
     fun createIngredient(
         name: String,
@@ -179,21 +208,29 @@ class AddRecipeViewModel @Inject constructor(
         nutrition: Nutrition
     ) {
         viewModelScope.launch {
-            // Insert Nutrition, grab its new ID
-            val nutritionId = nutritionDao.insertNutrition(nutrition).toInt()
-            // Build Ingredient entity
+            // 1) insert Nutrition
+            val nutritionId = nutritionDao
+                .insertNutrition(nutrition)
+                .toInt()
+
+            // 2) build Ingredient (still id = 0)
             val ingredient = Ingredient(
-                nutritionId = nutritionId,
-                name = name,
-                price = price,
+                nutritionId   = nutritionId,
+                name          = name,
+                price         = price,
                 priceCurrency = currency,
-                quantity = quantity,
-                unit = unit
+                quantity      = quantity,
+                unit          = unit
             )
-            // Insert Ingredient
-            ingredientDao.insert(ingredient)
-            // Select it immediately
-            _selectedIngredients.add(ingredient)
+
+            // 3) insert & grab the generated id
+            val newId = ingredientDao.insert(ingredient).toInt()
+
+            // 4) update the instance with its real id
+            val savedIngredient = ingredient.copy(id = newId)
+
+            // 5) add to your in-memory list
+            _selectedIngredients.add(savedIngredient)
         }
     }
 

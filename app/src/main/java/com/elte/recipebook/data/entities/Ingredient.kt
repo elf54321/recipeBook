@@ -15,26 +15,25 @@ import androidx.room.PrimaryKey
     foreignKeys = [
         ForeignKey(
             entity = Nutrition::class,
-            parentColumns = ["iD"],
+            parentColumns = ["id"],
             childColumns = ["nutritionId"],
             onDelete = ForeignKey.CASCADE
         )
     ],
     indices = [
         Index("nutritionId"),
-        Index(value = ["name"], unique = true)  // <- enforcing unique ingredients
+        Index(value = ["name"], unique = true)
     ]
 )
-//Example:
-// (Quantity x Unit) Name costs Price PriceCurrency.
-// 2 l milk costs 800 Ft
-data class Ingredient (
+data class Ingredient(
     @PrimaryKey(autoGenerate = true)
-    val iD: Int =0,
-    val nutritionId: Int,  // references Nutrition.iD
-    var name: String,
-    var price: Double,
-    var priceCurrency: String,
-    var quantity: Double,
+    val id: Int = 0,
+
+    val nutritionId: Int,    // → Nutrition.id Foreign Key
+
+    val name: String,
+    val price: Double,
+    val priceCurrency: String,
+    val quantity: Double,
     val unit: String
 )

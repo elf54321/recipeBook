@@ -100,7 +100,7 @@ fun SelectIngredientsScreen(
                         .clickable(onClick = onAddNewIngredient)
                 ) {
                     Text(
-                        text = "+ Create new Ingredient",
+                        text = "+ Add new Ingredient",
                         modifier = Modifier.padding(16.dp),
                         style = MaterialTheme.typography.bodyLarge
                     )
@@ -108,14 +108,19 @@ fun SelectIngredientsScreen(
             }
         }
 
-        // Bottom “Add Ingredients” button
         Button(
-            onClick = onDone,
+            onClick = {
+                // Tell the VM to insert the recipe (and its cross-refs)
+                viewModel.insertRecipe {
+                    // If successful, onDone callback being called
+                    onDone()
+                }
+            },
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .padding(vertical = 8.dp)
         ) {
-            Text("Add Ingredients")
+            Text("Create Recipe")
         }
     }
 }

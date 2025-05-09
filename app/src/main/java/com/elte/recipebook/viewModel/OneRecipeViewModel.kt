@@ -11,7 +11,9 @@ import com.elte.recipebook.data.entities.IngredientWithNutrition
 import kotlinx.coroutines.launch
 
 class OneRecipeViewModel(application: Application) : AndroidViewModel(application) {
-    private val recipeDao = AppDatabase.getDatabase(application).recipeDao()
+    private val db = AppDatabase.getDatabase(application)
+    private val recipeDao    = db.recipeDao()
+    private val nutritionDao = db.nutritionDao()
 
     private val _recipe = MutableLiveData<Recipe?>()
     val recipe: LiveData<Recipe?> = _recipe
@@ -20,17 +22,22 @@ class OneRecipeViewModel(application: Application) : AndroidViewModel(applicatio
     val ingredients: LiveData<List<IngredientWithNutrition>> = _ingredients
 
     fun getRecipeDetails(recipeId: Int) {
-        viewModelScope.launch {
-            val recipe = recipeDao.getRecipeById(recipeId)
-            _recipe.postValue(recipe)
+              viewModelScope.launch {
+                    // 1) Recipe row
+                    val r = recipeDao.getRecipeById(recipeId)
+                    _recipe.postValue(r)
 
-            val ingredients = recipeDao.getIngredientsByRecipeId(recipeId)
-            val fullData = ingredients.map {
-                val nutrition = recipeDao.getNutritionById(it.nutritionId)
-                IngredientWithNutrition(it, nutrition)
-            }
-            _ingredients.postValue(fullData)
-        }
+                    // 2) Ingredients for that recipe
+                    val ings = recipeDao.getIngredientsByRecipeId(recipeId)
+
+                    // 3) For each, load its nutrition row
+                   val full = ings.map { ing ->
+                          // getNutritionById returns Nutrition? so handle null if needed
+                          val nut = nutritionDao.getNutritionById(ing.nutritionId)
+                       nut?.let { IngredientWithNutrition(ing, it) }
+                        }
+                    _ingredients.postValue(full as List<IngredientWithNutrition>?)
+                  }
     }
     fun getRecipeById(recipeId: Int) {
         viewModelScope.launch {

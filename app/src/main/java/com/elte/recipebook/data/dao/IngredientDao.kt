@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface IngredientDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(ingredient: Ingredient)
+    suspend fun insert(ingredient: Ingredient): Long
 
     @Query("SELECT * FROM ingredient")
     fun getAllIngredients(): Flow<List<Ingredient>>
