@@ -38,7 +38,7 @@ fun OneRecipeScreen(
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(recipeId) {
-        //viewModel.getRecipeDetails(recipeId)
+        viewModel.getRecipeDetails(recipeId)
     }
     var showDeleteDialog by remember { mutableStateOf(false) }
 
