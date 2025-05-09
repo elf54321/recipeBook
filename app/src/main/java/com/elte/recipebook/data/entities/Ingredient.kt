@@ -22,15 +22,19 @@ import androidx.room.PrimaryKey
     ],
     indices = [
         Index("nutritionId"),
-       // Index(value = ["name"], unique = true)  // <- enforcing unique ingredients
+        Index(value = ["name"], unique = true)  // <- enforcing unique ingredients
     ]
 )
-// Info about a unique ingredient.
+//Example:
+// (Quantity x Unit) Name costs Price PriceCurrency.
+// 2 l milk costs 800 Ft
 data class Ingredient (
-    @PrimaryKey
-    val iD: Int,
+    @PrimaryKey(autoGenerate = true)
+    val iD: Int =0,
+    val nutritionId: Int,  // references Nutrition.iD
     var name: String,
-    var price: Double, // How much does a unit cost from this Ingredient. (kg,piece,package...)
-    var priceCurrency: String, // Auto-fill based on region/location data.
-    val nutritionId: Int  // references Nutrition.iD
+    var price: Double,
+    var priceCurrency: String,
+    var quantity: Double,
+    val unit: String
 )

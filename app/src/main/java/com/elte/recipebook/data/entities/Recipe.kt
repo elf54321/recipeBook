@@ -21,18 +21,18 @@ data class Recipe (
     val iD: Int,
     var name: String,
     val imageUri: String? = null,
-    var instructions: String, //description
+    var description: String, //instructions
     var source: String? = null, // What is the recipe s origin.
 
     // Added with Recipe Detail screen
     var portion: Double, // This recipie is for this many person.
-    var typeOfMeal: Enum<TypeOfMeal>,
+    var typeOfMeal: TypeOfMeal,
     var priceCategory: String,
-    var equipment: Enum<Equipment>,
+    var equipment: Array<Equipment> = arrayOf(), //List of needed equipments, type conv needed
 
     // Added with Select Ingredients
     var nutrition: Nutrition? = null, // ez lehet kimegy
-    var ingredients: List<IngredientInformation>
+    var ingredients: List<IngredientInformation> = emptyList()
 
 
 )

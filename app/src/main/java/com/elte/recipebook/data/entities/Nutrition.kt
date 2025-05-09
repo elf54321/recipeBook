@@ -5,8 +5,8 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "nutrition")
 data class Nutrition (
-    @PrimaryKey
-    val iD: Int,
+    @PrimaryKey(autoGenerate = true)
+    val iD: Int = 0,
     var energy: Int,
     var fat: Double,
     var protein: Double,

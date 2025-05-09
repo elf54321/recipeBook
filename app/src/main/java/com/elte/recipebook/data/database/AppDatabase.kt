@@ -13,18 +13,17 @@ import com.elte.recipebook.data.entities.*
         Nutrition::class,
         Ingredient::class,
         Recipe::class,
-        IngredientInformation::class,
         MealPlan::class,
-        MealPlanRecipeCrossRef::class
+        MealPlanRecipeCrossRef::class,
+        RecipeIngredientCrossRef::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun ingredientDao(): IngredientDao
-    abstract fun ingredientInformationDao(): IngredientInformationDao
     abstract fun recipeDao(): RecipeDao
     abstract fun mealPlanDao(): MealPlanDao
 
@@ -41,7 +40,7 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "recipe_database.db"
-                ).build()
+                ).fallbackToDestructiveMigration().build()
                 INSTANCE = instance
                 instance
             }
