@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,6 +22,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.elte.recipebook.ui.theme.SoftBackground
 import kotlinx.coroutines.launch
 
 @Composable
@@ -31,18 +33,21 @@ fun OneRecipeScreen(
     viewModel: OneRecipeViewModel = viewModel(key = "recipe_$recipeId")
 ) {
     val recipe by viewModel.recipe.observeAsState()
+    val ingredients by viewModel.ingredients.observeAsState(emptyList())
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(recipeId) {
-        viewModel.getRecipeById(recipeId)
+        viewModel.getRecipeDetails(recipeId)
     }
     var showDeleteDialog by remember { mutableStateOf(false) }
+
 
     Box(
         modifier = modifier
             .fillMaxSize()
-            .padding(24.dp)
+            .padding(horizontal = 12.dp)
+            .background(SoftBackground)
     ) {
         recipe?.let {
             Box(modifier = Modifier.fillMaxSize()) {
@@ -88,6 +93,50 @@ fun OneRecipeScreen(
 
                     Text(it.name, style = MaterialTheme.typography.headlineSmall)
                     Text(it.description, style = MaterialTheme.typography.bodyMedium)
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 16.dp)
+                    ) {
+                        ingredients.forEach { (ingredient, nutrition) ->
+                            var showInfo by remember { mutableStateOf(false) }
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp)
+                                    .background(Color.White)
+                                    .padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(ingredient.price.toString(), modifier = Modifier.weight(1f)) // Replace with actual quantity
+                                Text(ingredient.priceCurrency, modifier = Modifier.weight(1f)) // Replace with unit
+                                Text(ingredient.name, modifier = Modifier.weight(2f))
+                                IconButton(onClick = { showInfo = true }) {
+                                    Icon(Icons.Default.Info, contentDescription = "Nutritional Info")
+                                }
+                            }
+
+                            if (showInfo) {
+                                AlertDialog(
+                                    onDismissRequest = { showInfo = false },
+                                    title = { Text("Nutrition Info") },
+                                    text = {
+                                        Text("${nutrition.energy} kcal, ${nutrition.fat}g fat, ${nutrition.protein}g protein, " +
+                                                "${nutrition.carbohydrate}g carbs, ${nutrition.sugar}g sugar, ${nutrition.salt}g salt, ${nutrition.fiber}g fiber")
+                                    },
+                                    confirmButton = {
+                                        TextButton(onClick = { showInfo = false }) {
+                                            Text("OK")
+                                        }
+                                    }
+                                )
+                            }
+                        }
+                    }
+
                 }
             }
         } ?: run {
