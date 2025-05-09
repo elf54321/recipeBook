@@ -242,9 +242,7 @@ fun AddRecipeDetailScreen(
                 Button(
                     onClick = {
                         // validate required fields
-                        viewModel.insertRecipe {
-                            Toast.makeText(context, "Saved!", Toast.LENGTH_SHORT).show()
-                        }
+                        navController.navigate("add/selectIngredients")
                     },
                     modifier = Modifier
                         .fillMaxWidth()

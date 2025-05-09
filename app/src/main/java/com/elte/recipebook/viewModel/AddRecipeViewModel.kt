@@ -121,6 +121,8 @@ class AddRecipeViewModel @Inject constructor(
                 var isPriceMenuExpanded by mutableStateOf(false)
                     private set
                 fun togglePriceMenu() { isPriceMenuExpanded = !isPriceMenuExpanded }
+
+        ////////// SelectIngredientsScreen(3rd) //////////
     // --------------------------------------------------------------------------//
 
     // Creating a new recipe in the database
