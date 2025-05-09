@@ -91,7 +91,7 @@ fun AddRecipeScreen(
                 OutlinedTextField(
                     value = description,
                     onValueChange = viewModel::onDescriptionChange,
-                    label = { Text("Description") },
+                    label = { Text("Instructions and Description") },
                     shape = RoundedCornerShape(16.dp),
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = Color.White,
