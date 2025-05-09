@@ -7,33 +7,37 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.elte.recipebook.data.Equipment
+import com.elte.recipebook.data.PriceCategory
+import com.elte.recipebook.data.TypeOfMeal
 
-@Entity(tableName = "recipe")
+@Entity(
+    tableName = "recipe",
+    foreignKeys = [
+        ForeignKey(
+            entity = Nutrition::class,
+            parentColumns = ["id"],
+            childColumns = ["nutritionId"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ],
+    indices = [ Index("nutritionId") ]
+)
 data class Recipe(
-    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    @PrimaryKey(autoGenerate = true)
+    val id: Int = 0,
+
     val name: String,
     val description: String,
-    val imageUri: String? = null
-)
-/*
-data class Recipe (
-    // Added with Recipe screen
-    val iD: Int,
-    var name: String,
     val imageUri: String? = null,
-    var description: String, //instructions
-    var source: String? = null, // What is the recipe s origin.
+    val source: String? = null,
+    val portion: Double,
 
-    // Added with Recipe Detail screen
-    var portion: Double, // This recipie is for this many person.
-    var typeOfMeal: TypeOfMeal,
-    var priceCategory: String,
-    var equipment: Array<Equipment> = arrayOf(), //List of needed equipments, type conv needed
+    val typeOfMeal: TypeOfMeal,
+    val priceCategory: PriceCategory,
 
-    // Added with Select Ingredients
-    var nutrition: Nutrition? = null, // ez lehet kimegy
-    var ingredients: List<IngredientInformation> = emptyList()
+    // TypeConverter for List<Equipment>
+    var equipment: Array<Equipment> = arrayOf(),
 
-
+    val nutritionId: Int // → Nutrition.id Foreign Key
 )
-*/

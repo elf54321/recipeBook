@@ -4,14 +4,15 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "nutrition")
-data class Nutrition (
+data class Nutrition(
     @PrimaryKey(autoGenerate = true)
-    val iD: Int = 0,
-    var energy: Int,
-    var fat: Double,
-    var protein: Double,
-    var carbohydrate: Double,
-    var sugar: Double,
-    var salt: Double,
-    var fiber: Double
+    val id: Int = 0,
+
+    val energy: Int,// kcal
+    val fat: Double,
+    val protein: Double,
+    val carbohydrate: Double,
+    val sugar: Double,
+    val salt: Double,
+    val fiber: Double
 )

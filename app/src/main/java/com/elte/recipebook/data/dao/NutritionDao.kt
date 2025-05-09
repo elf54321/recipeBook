@@ -16,6 +16,6 @@ interface NutritionDao {
     @Query("SELECT * FROM nutrition")
     fun getAllNutrition(): Flow<List<Nutrition>>
 
-    @Query("SELECT * FROM nutrition WHERE iD = :id LIMIT 1")
+    @Query("SELECT * FROM nutrition WHERE id = :id LIMIT 1")
     suspend fun getNutritionById(id: Int): Nutrition?
 }
