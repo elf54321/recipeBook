@@ -1,8 +1,15 @@
 package com.elte.recipebook.ui.screens
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.Divider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,9 +26,12 @@ fun CreateNewIngredientsScreen(
     navController: NavHostController,
     onIngredientCreated: () -> Unit
 ) {
-    // Obtain the shared VM from the "add" nav-entry
+    // Shared VM from the "add" nav-entry
     val parentEntry = remember { navController.getBackStackEntry("add") }
     val viewModel: AddRecipeViewModel = hiltViewModel(parentEntry)
+
+    // Scroll state
+    val scrollState = rememberScrollState()
 
     // Local UI state for ingredient properties
     var name by remember { mutableStateOf("") }
@@ -42,8 +52,9 @@ fun CreateNewIngredientsScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
+            .verticalScroll(scrollState)
             .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text(
             text = "Create New Ingredient",
@@ -60,7 +71,7 @@ fun CreateNewIngredientsScreen(
         )
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             OutlinedTextField(
                 value = quantity,
@@ -77,7 +88,7 @@ fun CreateNewIngredientsScreen(
         }
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             OutlinedTextField(
                 value = price,
@@ -100,7 +111,10 @@ fun CreateNewIngredientsScreen(
         )
 
         // Nutrition fields
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
             OutlinedTextField(
                 value = energy,
                 onValueChange = { energy = it },
@@ -145,7 +159,8 @@ fun CreateNewIngredientsScreen(
             )
         }
 
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.height(24.dp))
+
         Button(
             onClick = {
                 // Parse inputs and create data objects
@@ -172,7 +187,7 @@ fun CreateNewIngredientsScreen(
                 .fillMaxWidth()
                 .height(50.dp)
         ) {
-            Text("Save Ingredient")
+            Text(text = "Save Ingredient")
         }
     }
 }

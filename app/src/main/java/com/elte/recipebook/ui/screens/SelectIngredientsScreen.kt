@@ -77,9 +77,9 @@ fun SelectIngredientsScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(text = "Ingredient", style = MaterialTheme.typography.bodyLarge)
+                        Text(text = ingredient.name, style = MaterialTheme.typography.bodyLarge)
                         Text(
-                            text = "${"ingredient.name"} kcal/${"ingredient.unit"}",
+                            text = "${ingredient.quantity} ${ingredient.unit}",
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }

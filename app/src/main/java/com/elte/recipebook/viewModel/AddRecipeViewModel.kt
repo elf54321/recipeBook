@@ -179,9 +179,9 @@ class AddRecipeViewModel @Inject constructor(
         nutrition: Nutrition
     ) {
         viewModelScope.launch {
-            // 1) Insert Nutrition, grab its new ID
+            // Insert Nutrition, grab its new ID
             val nutritionId = nutritionDao.insertNutrition(nutrition).toInt()
-            // 2) Build Ingredient entity
+            // Build Ingredient entity
             val ingredient = Ingredient(
                 nutritionId = nutritionId,
                 name = name,
@@ -190,9 +190,9 @@ class AddRecipeViewModel @Inject constructor(
                 quantity = quantity,
                 unit = unit
             )
-            // 3) Insert Ingredient
+            // Insert Ingredient
             ingredientDao.insert(ingredient)
-            // 4) Optionally select it immediately
+            // Select it immediately
             _selectedIngredients.add(ingredient)
         }
     }
