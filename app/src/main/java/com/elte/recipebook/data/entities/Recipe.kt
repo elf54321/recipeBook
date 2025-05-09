@@ -15,10 +15,10 @@ import com.elte.recipebook.data.TypeOfMeal
     tableName = "recipe",
     foreignKeys = [
         ForeignKey(
-            entity = Nutrition::class,
+            entity        = Nutrition::class,
             parentColumns = ["id"],
-            childColumns = ["nutritionId"],
-            onDelete = ForeignKey.CASCADE
+            childColumns  = ["nutritionId"],
+            onDelete      = ForeignKey.CASCADE
         )
     ],
     indices = [ Index("nutritionId") ]
@@ -36,8 +36,7 @@ data class Recipe(
     val typeOfMeal: TypeOfMeal,
     val priceCategory: PriceCategory,
 
-    // TypeConverter for List<Equipment>
     var equipment: Array<Equipment> = arrayOf(),
 
-    val nutritionId: Int // → Nutrition.id Foreign Key
+    val nutritionId: Int? = null
 )

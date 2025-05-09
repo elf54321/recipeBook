@@ -71,13 +71,6 @@ class AddRecipeViewModel @Inject constructor(
             fun onDescriptionChange(new: String) { description = new }
             fun onImageSelected(uri: Uri?) { imageUri = uri?.toString() }
 
-            private fun resetForm() {
-                name         = ""
-                description = ""
-                imageUri     = null
-            }
-
-
         ////////// AddRecipeDetailScreen(2nd) //////////
         // Backing state (private) + public getters for dropdowns
             private var _selectedType by mutableStateOf(TypeOfMeal.BREAKFAST)
@@ -135,7 +128,8 @@ class AddRecipeViewModel @Inject constructor(
 
         // SnapshotStateList for the ones the user has tapped
         private val _selectedIngredients = mutableStateListOf<Ingredient>()
-        val selectedIngredients: List<Ingredient> = _selectedIngredients
+        val selectedIngredients: List<Ingredient>
+            get() = _selectedIngredients
 
         init {
             // Kick off collecting the ingredient list
@@ -164,19 +158,18 @@ class AddRecipeViewModel @Inject constructor(
             // 2) Parse the portion
             val portionValue = portionText.toDoubleOrNull() ?: 1.0
 
-            // 3) Build the Recipe entity (nutritionId left as default 0/null)
+            // 3) Recipe entity
             val newRecipe = Recipe(
                 name          = name,
                 description   = description,
                 imageUri      = imageUriString,
-                source        = null,                     // or capture if you have a field
+                source        = "AddedByUser",
                 portion       = portionValue,
                 typeOfMeal    = selectedType,
                 priceCategory = selectedPriceCategory,
-                equipment     = selectedEquipment.toTypedArray(),
-                nutritionId = 0
+                equipment     = selectedEquipment.toTypedArray()
                 // convert List→Array
-                // nutritionId uses the default 0/null
+                // nutrition id is not part of the db currently
             )
 
             // 4) Insert and grab the generated ID
@@ -196,6 +189,12 @@ class AddRecipeViewModel @Inject constructor(
             resetForm()
             onSuccess()
         }
+    }
+    private fun resetForm() {
+        name         = ""
+        description  = ""
+        imageUri     = null
+        _selectedIngredients.clear()
     }
     // --------------------------------------------------------------------------//
     //                        Ingredient - Nutrition Part                        //
