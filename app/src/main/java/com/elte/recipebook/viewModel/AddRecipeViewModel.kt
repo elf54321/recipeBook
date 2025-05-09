@@ -15,14 +15,19 @@ import com.elte.recipebook.data.entities.Recipe
 import com.elte.recipebook.data.TypeOfMeal
 import com.elte.recipebook.data.Equipment
 import com.elte.recipebook.data.PriceCategory
+import com.elte.recipebook.data.dao.IngredientDao
+import com.elte.recipebook.data.entities.Ingredient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import javax.inject.Inject
 
 @HiltViewModel
 class AddRecipeViewModel @Inject constructor(
-    private val recipeDao: RecipeDao
+    private val recipeDao: RecipeDao,
+    private val ingredientDao: IngredientDao
 ) : ViewModel() {
     // --------------------------------------------------------------------------//
     //                          Nutrition Part                                   //
@@ -124,6 +129,32 @@ class AddRecipeViewModel @Inject constructor(
 
         ////////// SelectIngredientsScreen(3rd) //////////
     // --------------------------------------------------------------------------//
+        // Backing StateFlow for all ingredients in DB
+        private val _allIngredients = MutableStateFlow<List<Ingredient>>(emptyList())
+        val allIngredients: StateFlow<List<Ingredient>> = _allIngredients
+
+        // SnapshotStateList for the ones the user has tapped
+        private val _selectedIngredients = mutableStateListOf<Ingredient>()
+        val selectedIngredients: List<Ingredient> = _selectedIngredients
+
+        init {
+            // Kick off collecting the ingredient list
+            viewModelScope.launch {
+                ingredientDao.getAllIngredients()
+                    .collect { list ->
+                        _allIngredients.value = list
+                    }
+            }
+        }
+
+        /* Toggle whether an ingredient is in the selected list */
+        fun toggleIngredientSelection(ing: Ingredient) {
+            if (_selectedIngredients.contains(ing)) {
+                _selectedIngredients.remove(ing)
+            } else {
+                _selectedIngredients.add(ing)
+            }
+        }
 
     // Creating a new recipe in the database
     fun insertRecipe(onSuccess: () -> Unit = {}) {
