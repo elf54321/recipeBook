@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 interface NutritionDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(nutrition: Nutrition)
+    suspend fun insertNutrition(nutrition: Nutrition): Long
 
     @Query("SELECT * FROM nutrition")
     fun getAllNutrition(): Flow<List<Nutrition>>

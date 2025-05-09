@@ -16,7 +16,9 @@ import com.elte.recipebook.data.TypeOfMeal
 import com.elte.recipebook.data.Equipment
 import com.elte.recipebook.data.PriceCategory
 import com.elte.recipebook.data.dao.IngredientDao
+import com.elte.recipebook.data.dao.NutritionDao
 import com.elte.recipebook.data.entities.Ingredient
+import com.elte.recipebook.data.entities.Nutrition
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,17 +29,10 @@ import javax.inject.Inject
 @HiltViewModel
 class AddRecipeViewModel @Inject constructor(
     private val recipeDao: RecipeDao,
-    private val ingredientDao: IngredientDao
+    private val ingredientDao: IngredientDao,
+    private val nutritionDao: NutritionDao
 ) : ViewModel() {
     // --------------------------------------------------------------------------//
-    //                          Nutrition Part                                   //
-    // --------------------------------------------------------------------------//
-
-
-
-
-    // --------------------------------------------------------------------------//
-
     // --------------------------------------------------------------------------//
     //                          Recipe Part                                      //
     // --------------------------------------------------------------------------//
@@ -155,7 +150,6 @@ class AddRecipeViewModel @Inject constructor(
                 _selectedIngredients.add(ing)
             }
         }
-
     // Creating a new recipe in the database
     fun insertRecipe(onSuccess: () -> Unit = {}) {
         // Validation
@@ -173,4 +167,34 @@ class AddRecipeViewModel @Inject constructor(
             onSuccess()
         }
     }
+    // --------------------------------------------------------------------------//
+    //                          Nutrition Part                                   //
+    // --------------------------------------------------------------------------//
+    fun createIngredient(
+        name: String,
+        price: Double,
+        currency: String,
+        quantity: Double,
+        unit: String,
+        nutrition: Nutrition
+    ) {
+        viewModelScope.launch {
+            // 1) Insert Nutrition, grab its new ID
+            val nutritionId = nutritionDao.insertNutrition(nutrition).toInt()
+            // 2) Build Ingredient entity
+            val ingredient = Ingredient(
+                nutritionId = nutritionId,
+                name = name,
+                price = price,
+                priceCurrency = currency,
+                quantity = quantity,
+                unit = unit
+            )
+            // 3) Insert Ingredient
+            ingredientDao.insert(ingredient)
+            // 4) Optionally select it immediately
+            _selectedIngredients.add(ingredient)
+        }
+    }
+
 }

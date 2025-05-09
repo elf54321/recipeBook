@@ -26,8 +26,6 @@ import com.elte.recipebook.ui.theme.SoftBackground
 import com.elte.recipebook.ui.theme.SunnyYellow
 import com.elte.recipebook.viewModel.AddRecipeViewModel
 
-import com.elte.recipebook.data.entities.Ingredient
-
 @SuppressLint("UnrememberedGetBackStackEntry")
 @Composable
 fun SelectIngredientsScreen(
