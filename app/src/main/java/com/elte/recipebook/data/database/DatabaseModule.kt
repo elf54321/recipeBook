@@ -2,6 +2,8 @@ package com.elte.recipebook.data.database
 
 import android.content.Context
 import androidx.room.Room
+import com.elte.recipebook.data.dao.IngredientDao
+import com.elte.recipebook.data.dao.NutritionDao
 import com.elte.recipebook.data.dao.RecipeDao
 import dagger.Module
 import dagger.Provides
@@ -16,8 +18,17 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideDatabase(@ApplicationContext ctx: Context): AppDatabase =
-        Room.databaseBuilder(ctx, AppDatabase::class.java, "recipe_database.db").build()
+        Room.databaseBuilder(ctx, AppDatabase::class.java, "recipe_database.db").
+        fallbackToDestructiveMigration().build()
 
     @Provides
     fun provideRecipeDao(db: AppDatabase): RecipeDao = db.recipeDao()
+
+    @Provides
+    fun provideIngredientDao(db: AppDatabase): IngredientDao =
+        db.ingredientDao()
+
+    @Provides
+    fun provideNutrition(db: AppDatabase): NutritionDao =
+        db.nutritionDao()
 }

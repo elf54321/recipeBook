@@ -17,14 +17,23 @@ data class Recipe(
 )
 /*
 data class Recipe (
+    // Added with Recipe screen
     val iD: Int,
-    var ingredients: List<IngredientInformation>,
     var name: String,
-    var source: String,
-    var instructions: String,
-    var portion: Double,
-    var typeOfMeal: Enum<TypeOfMeal>,
+    val imageUri: String? = null,
+    var description: String, //instructions
+    var source: String? = null, // What is the recipe s origin.
+
+    // Added with Recipe Detail screen
+    var portion: Double, // This recipie is for this many person.
+    var typeOfMeal: TypeOfMeal,
     var priceCategory: String,
-    var nutrition: Nutrition
+    var equipment: Array<Equipment> = arrayOf(), //List of needed equipments, type conv needed
+
+    // Added with Select Ingredients
+    var nutrition: Nutrition? = null, // ez lehet kimegy
+    var ingredients: List<IngredientInformation> = emptyList()
+
+
 )
 */

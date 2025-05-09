@@ -13,7 +13,6 @@ import com.elte.recipebook.data.entities.*
         Nutrition::class,
         Ingredient::class,
         Recipe::class,
-        IngredientInformation::class,
         MealPlan::class,
         MealPlanRecipeCrossRef::class,
         RecipeIngredientCrossRef::class
@@ -25,7 +24,6 @@ import com.elte.recipebook.data.entities.*
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun ingredientDao(): IngredientDao
-    abstract fun ingredientInformationDao(): IngredientInformationDao
     abstract fun recipeDao(): RecipeDao
     abstract fun mealPlanDao(): MealPlanDao
 

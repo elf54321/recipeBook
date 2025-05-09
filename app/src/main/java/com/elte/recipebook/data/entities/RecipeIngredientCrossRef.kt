@@ -6,4 +6,3 @@ import androidx.room.Entity
 data class RecipeIngredientCrossRef(
     val recipeId: Int,
     val ingredientId: Int
-)
