@@ -15,9 +15,9 @@ import com.elte.recipebook.data.entities.*
         Recipe::class,
         MealPlan::class,
         MealPlanRecipeCrossRef::class,
-        RecipeIngredientCrossRef::class
+        RecipeIngredientCrossRef::class,
     ],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 @TypeConverters(Converters::class)

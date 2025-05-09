@@ -155,14 +155,9 @@ class AddRecipeViewModel @Inject constructor(
         // Validation
         if (name.isBlank()) return
 
-        val newRecipe = Recipe(
-            name         = name.trim(),
-            description = description.trim(),
-            imageUri     = imageUri,
-        )
 
         viewModelScope.launch {
-            recipeDao.insert(newRecipe)
+            //recipeDao.insert()
             resetForm()
             onSuccess()
         }

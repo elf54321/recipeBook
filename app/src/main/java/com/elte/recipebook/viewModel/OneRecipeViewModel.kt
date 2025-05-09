@@ -18,7 +18,7 @@ class OneRecipeViewModel(application: Application) : AndroidViewModel(applicatio
 
     private val _ingredients = MutableLiveData<List<IngredientWithNutrition>>()
     val ingredients: LiveData<List<IngredientWithNutrition>> = _ingredients
-
+/*
     fun getRecipeDetails(recipeId: Int) {
         viewModelScope.launch {
             val recipe = recipeDao.getRecipeById(recipeId)
@@ -32,6 +32,7 @@ class OneRecipeViewModel(application: Application) : AndroidViewModel(applicatio
             _ingredients.postValue(fullData)
         }
     }
+ */
     fun getRecipeById(recipeId: Int) {
         viewModelScope.launch {
             val fetchedRecipe = recipeDao.getRecipeById(recipeId)
