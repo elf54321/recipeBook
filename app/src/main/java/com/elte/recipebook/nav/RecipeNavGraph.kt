@@ -54,6 +54,7 @@ fun RecipeNavGraph(
             CreateNewIngredientsScreen(
                 modifier            = modifier,
                 navController       = navController,
+                parentEntity        = "add",
                 onIngredientCreated = {
                     // after we’ve saved the new ingredient, pop back
                     navController.popBackStack(
@@ -71,7 +72,11 @@ fun RecipeNavGraph(
                 ?.getString("recipeId")
                 ?.toIntOrNull()
             if (recipeId != null) {
-                OneRecipeScreen(recipeId, navigateToRoute, modifier)
+                OneRecipeScreen(
+                    recipeId,
+                    navigateToRoute,
+                    navController,
+                    modifier)
             }
         }
     }

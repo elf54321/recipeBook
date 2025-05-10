@@ -6,7 +6,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -21,7 +23,10 @@ import com.elte.recipebook.viewModel.OneRecipeViewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import com.elte.recipebook.ui.theme.SoftBackground
 import kotlinx.coroutines.launch
 
@@ -29,6 +34,7 @@ import kotlinx.coroutines.launch
 fun OneRecipeScreen(
     recipeId: Int,
     navigateToRoute: (String) -> Unit,
+    navController: NavHostController,
     modifier: Modifier = Modifier,
     viewModel: OneRecipeViewModel = viewModel(key = "recipe_$recipeId")
 ) {
@@ -41,6 +47,8 @@ fun OneRecipeScreen(
         viewModel.getRecipeDetails(recipeId)
     }
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var showIngredientPopup by remember { mutableStateOf(false) }
+    var isEditing by remember { mutableStateOf(false) }
 
 
     Box(
@@ -51,6 +59,16 @@ fun OneRecipeScreen(
     ) {
         recipe?.let {
             Box(modifier = Modifier.fillMaxSize()) {
+                IconButton(
+                    onClick = { isEditing = !isEditing },
+                    modifier = Modifier.align(Alignment.TopStart)
+                ) {
+                    Icon(
+                        imageVector = if (isEditing) Icons.Default.Check else Icons.Default.Edit,
+                        contentDescription = if (isEditing) "Save" else "Edit",
+                        tint = Color.Black
+                    )
+                }
 
                 IconButton(
                     onClick = { showDeleteDialog = true },
@@ -90,53 +108,120 @@ fun OneRecipeScreen(
                             Text("No Image", color = Color.DarkGray)
                         }
                     }
+                    if (isEditing) {
+                        Button(onClick = { /* TODO: Image picker */ }) {
+                            Text("Change Image")
+                        }
+                    }
 
-                    Text(it.name, style = MaterialTheme.typography.headlineSmall)
-                    Text(it.description, style = MaterialTheme.typography.bodyMedium)
+                    if (isEditing) {
+                        OutlinedTextField(
+                            value = "22",//editedTitle,
+                            onValueChange = { },//editedTitle = it },
+                            label = { Text("Title") }
+                        )
+                        OutlinedTextField(
+                            value = "22",//editedDescription,
+                            onValueChange = {},// editedDescription = it },
+                            label = { Text("Description") }
+                        )
+                    } else {
+                        Text(it.name, style = MaterialTheme.typography.headlineSmall)
+                        Text(it.description, style = MaterialTheme.typography.bodyMedium)
+                    }
 
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = 16.dp)
                     ) {
-                        ingredients.forEach { (ingredient, nutrition) ->
-                            var showInfo by remember { mutableStateOf(false) }
-
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(8.dp)
-                                    .background(Color.White)
-                                    .padding(12.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text(ingredient.price.toString(), modifier = Modifier.weight(1f)) // Replace with actual quantity
-                                Text(ingredient.priceCurrency, modifier = Modifier.weight(1f)) // Replace with unit
-                                Text(ingredient.name, modifier = Modifier.weight(2f))
-                                IconButton(onClick = { showInfo = true }) {
-                                    Icon(Icons.Default.Info, contentDescription = "Nutritional Info")
+                        if (isEditing) {
+                            ingredients.forEach { (ingredient, nutrition) ->
+                                //ingredients.forEachIndexed { index, (ingredient, _) ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 4.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    OutlinedTextField(
+                                        value = ingredient.quantity.toString(),
+                                        onValueChange = { /* update */ },
+                                        label = { Text("Qty") },
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    OutlinedTextField(
+                                        value = ingredient.unit,
+                                        onValueChange = { /* update */ },
+                                        label = { Text("Unit") },
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    OutlinedTextField(
+                                        value = ingredient.name,
+                                        onValueChange = { /* update */ },
+                                        label = { Text("Name") },
+                                        modifier = Modifier.weight(2f)
+                                    )
+                                    IconButton(onClick = { {} }) {}//removeIngredient(index) }) {
+                                    Icon(Icons.Default.Delete, contentDescription = "Remove")
                                 }
                             }
 
-                            if (showInfo) {
-                                AlertDialog(
-                                    onDismissRequest = { showInfo = false },
-                                    title = { Text("Nutrition Info") },
-                                    text = {
-                                        Text("${nutrition.energy} kcal, ${nutrition.fat}g fat, ${nutrition.protein}g protein, " +
-                                                "${nutrition.carbohydrate}g carbs, ${nutrition.sugar}g sugar, ${nutrition.salt}g salt, ${nutrition.fiber}g fiber")
-                                    },
-                                    confirmButton = {
-                                        TextButton(onClick = { showInfo = false }) {
-                                            Text("OK")
-                                        }
+                            Button(
+                                onClick = { showIngredientPopup = true },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text("Add Ingredient")
+                            }
+                        } else {
+                            ingredients.forEach { (ingredient, nutrition) ->
+                                var showInfo by remember { mutableStateOf(false) }
+
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .background(Color.White)
+                                        .padding(12.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(
+                                        ingredient.quantity.toString(),
+                                        modifier = Modifier.weight(1f)
+                                    ) // Replace with actual quantity
+                                    Text(
+                                        ingredient.unit,
+                                        modifier = Modifier.weight(1f)
+                                    ) // Replace with unit
+                                    Text(ingredient.name, modifier = Modifier.weight(2f))
+                                    IconButton(onClick = { showInfo = true }) {
+                                        Icon(
+                                            Icons.Default.Info,
+                                            contentDescription = "Nutritional Info"
+                                        )
                                     }
-                                )
+                                }
+
+                                if (showInfo) {
+                                    AlertDialog(
+                                        onDismissRequest = { showInfo = false },
+                                        title = { Text("Nutrition Info") },
+                                        text = {
+                                            Text(
+                                                "${nutrition.energy} kcal, ${nutrition.fat}g fat, ${nutrition.protein}g protein, " +
+                                                        "${nutrition.carbohydrate}g carbs, ${nutrition.sugar}g sugar, ${nutrition.salt}g salt, ${nutrition.fiber}g fiber"
+                                            )
+                                        },
+                                        confirmButton = {
+                                            TextButton(onClick = { showInfo = false }) {
+                                                Text("OK")
+                                            }
+                                        }
+                                    )
+                                }
                             }
                         }
                     }
-
                 }
             }
         } ?: run {
@@ -171,5 +256,25 @@ fun OneRecipeScreen(
                 }
             )
         }
+        if (showIngredientPopup) {
+            Dialog(onDismissRequest = { showIngredientPopup = false }) {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    shape = RoundedCornerShape(16.dp),
+                    tonalElevation = 8.dp
+                ) {
+                    CreateNewIngredientsScreen(
+                        navController = navController,
+                        parentEntity = "recipe/{recipeId}",
+                        onIngredientCreated = {
+                            navController.getBackStackEntry("recipe/{recipeId}")
+                            showIngredientPopup = false
+                        }
+//                            viewModel.refreshIngredients()
+                    )
+                }
+            }
+        }
+
     }
 }

@@ -24,10 +24,11 @@ import com.elte.recipebook.viewModel.AddRecipeViewModel
 fun CreateNewIngredientsScreen(
     modifier: Modifier = Modifier,
     navController: NavHostController,
-    onIngredientCreated: () -> Unit
+    onIngredientCreated: () -> Unit,
+    parentEntity : String
 ) {
     // Shared VM from the "add" nav-entry
-    val parentEntry = remember { navController.getBackStackEntry("add") }
+    val parentEntry = remember { navController.getBackStackEntry(parentEntity) }
     val viewModel: AddRecipeViewModel = hiltViewModel(parentEntry)
 
     // Scroll state
