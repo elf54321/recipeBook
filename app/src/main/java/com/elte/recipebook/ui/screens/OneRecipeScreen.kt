@@ -13,12 +13,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -28,6 +28,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.elte.recipebook.viewModel.OneRecipeViewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -76,8 +77,8 @@ fun OneRecipeScreen(
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showIngredientPopup by remember { mutableStateOf(false) }
     var showAddExistingIngredientPopup by remember { mutableStateOf(false) }
-
     var isEditing by remember { mutableStateOf(false) }
+
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
@@ -112,6 +113,25 @@ fun OneRecipeScreen(
                         tint = Color.Black
                     )
                 }
+                if (isEditing) {
+                    IconButton(
+                        onClick = {
+                            editedTitle = it.name
+                            editedDescription = it.description
+                            editedImageUri = it.imageUri
+                            editedIngredients.clear()
+                            editedIngredients.addAll(ingredients.map { it.ingredient.copy() })
+                            isEditing = false
+                        },
+                        modifier = Modifier.align(Alignment.TopStart).padding(40.dp,0.dp,0.dp,0.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Cancel Edit",
+                            tint = Color.Black
+                        )
+                    }
+                }
 
                 IconButton(
                     onClick = { showDeleteDialog = true },
@@ -130,9 +150,11 @@ fun OneRecipeScreen(
                     modifier = Modifier.fillMaxSize()
                         .padding(top = 56.dp)
                 ) {
-                    if (it.imageUri != null) {
+                    val imageToDisplay = if (isEditing) editedImageUri else it.imageUri
+
+                    if (!imageToDisplay.isNullOrBlank()) {
                         Image(
-                            painter = rememberAsyncImagePainter(it.imageUri.toUri()),
+                            painter = rememberAsyncImagePainter(imageToDisplay.toUri()),
                             contentDescription = null,
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -213,11 +235,6 @@ fun OneRecipeScreen(
                                         label = { Text("Name") },
                                         modifier = Modifier.weight(2f)
                                     )
-                                    IconButton(onClick = {
-                                        editedIngredients.removeAt(index)
-                                    }) {
-                                        Icon(Icons.Default.Delete, contentDescription = "Remove")
-                                    }
                                 }
                             }
 
@@ -233,7 +250,7 @@ fun OneRecipeScreen(
                                     onClick = { showAddExistingIngredientPopup = true },
                                     modifier = Modifier.weight(1f)
                                 ) {
-                                    Text("Add Existing")
+                                    Text("Edit Existing")
                                 }
                             }
 

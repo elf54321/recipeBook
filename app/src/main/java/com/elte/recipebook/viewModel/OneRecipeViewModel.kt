@@ -1,18 +1,13 @@
 package com.elte.recipebook.viewModel
 
 import android.app.Application
-import android.net.Uri
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import com.elte.recipebook.data.database.AppDatabase
 import com.elte.recipebook.data.entities.Recipe
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.elte.recipebook.data.dao.IngredientDao
 import com.elte.recipebook.data.entities.Ingredient
 import com.elte.recipebook.data.entities.IngredientWithNutrition
 import com.elte.recipebook.data.entities.RecipeIngredientCrossRef
@@ -73,7 +68,7 @@ class OneRecipeViewModel(application: Application) : AndroidViewModel(applicatio
 
             recipeDao.deleteCrossRefsByRecipeId(recipeId)
 
-            selectedIngredients.forEach { ingredient ->
+            updatedIngredients.forEach { ingredient ->
                 val crossRef = RecipeIngredientCrossRef(recipeId, ingredient.id)
                 recipeDao.insertRecipeIngredientCrossRef(crossRef)
             }
@@ -129,6 +124,7 @@ class OneRecipeViewModel(application: Application) : AndroidViewModel(applicatio
 
     suspend fun deleteRecipeById(id: Int) {
         recipeDao.deleteRecipeById(id)
+        recipeDao.deleteCrossRefsByRecipeId(id)
         _recipe.postValue(null)
     }
 }
