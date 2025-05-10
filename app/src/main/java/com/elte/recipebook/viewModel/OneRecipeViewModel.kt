@@ -1,7 +1,11 @@
 package com.elte.recipebook.viewModel
 
 import android.app.Application
+import android.net.Uri
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import com.elte.recipebook.data.database.AppDatabase
@@ -21,7 +25,6 @@ class OneRecipeViewModel(application: Application) : AndroidViewModel(applicatio
     private val recipeDao = db.recipeDao()
     private val nutritionDao = db.nutritionDao()
     private val ingredientDao = db.ingredientDao()
-
 
     private val _recipe = MutableLiveData<Recipe?>()
     val recipe: LiveData<Recipe?> = _recipe

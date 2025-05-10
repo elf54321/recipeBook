@@ -1,6 +1,9 @@
 package com.elte.recipebook.ui.screens
 
+import android.net.Uri
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -75,7 +78,11 @@ fun OneRecipeScreen(
     var showAddExistingIngredientPopup by remember { mutableStateOf(false) }
 
     var isEditing by remember { mutableStateOf(false) }
-
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        editedImageUri = uri.toString()
+    }
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -145,7 +152,9 @@ fun OneRecipeScreen(
                         }
                     }
                     if (isEditing) {
-                        Button(onClick = { /* TODO: Image picker */ }) {
+                        Button(
+                            onClick = { launcher.launch("image/*") }
+                        ) {
                             Text("Change Image")
                         }
                     }
