@@ -10,7 +10,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
@@ -37,6 +39,7 @@ import androidx.navigation.NavHostController
 import com.elte.recipebook.data.entities.Ingredient
 import com.elte.recipebook.ui.theme.SoftBackground
 import com.elte.recipebook.ui.theme.SunnyYellow
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
@@ -89,6 +92,8 @@ fun OneRecipeScreen(
             .fillMaxSize()
             .padding(horizontal = 12.dp)
             .background(SoftBackground)
+            .verticalScroll(rememberScrollState()) // This will make the column scrollable
+
     ) {
         recipe?.let {
             Box(modifier = Modifier.fillMaxSize()) {
@@ -104,7 +109,7 @@ fun OneRecipeScreen(
                             )
                         }
                         isEditing = !isEditing
-                              },
+                    },
                     modifier = Modifier.align(Alignment.TopStart)
                 ) {
                     Icon(
@@ -123,7 +128,9 @@ fun OneRecipeScreen(
                             editedIngredients.addAll(ingredients.map { it.ingredient.copy() })
                             isEditing = false
                         },
-                        modifier = Modifier.align(Alignment.TopStart).padding(40.dp,0.dp,0.dp,0.dp)
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .padding(40.dp, 0.dp, 0.dp, 0.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Close,
@@ -147,7 +154,8 @@ fun OneRecipeScreen(
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(16.dp),
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier
+                        .fillMaxSize()
                         .padding(top = 56.dp)
                 ) {
                     val imageToDisplay = if (isEditing) editedImageUri else it.imageUri
@@ -214,7 +222,8 @@ fun OneRecipeScreen(
                                     OutlinedTextField(
                                         value = ingredient.quantity.toString(),
                                         onValueChange = {
-                                            editedIngredients[index] = ingredient.copy(quantity = it.toDouble())
+                                            editedIngredients[index] =
+                                                ingredient.copy(quantity = it.toDouble())
                                         },
                                         label = { Text("Qty") },
                                         modifier = Modifier.weight(1f)
@@ -239,7 +248,10 @@ fun OneRecipeScreen(
                             }
 
 
-                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
                                 Button(
                                     onClick = { showIngredientPopup = true },
                                     modifier = Modifier.weight(1f)
@@ -351,10 +363,10 @@ fun OneRecipeScreen(
                             navController.getBackStackEntry("recipe/{recipeId}")
                             showIngredientPopup = false
                             coroutineScope.launch {
-                                viewModel.refreshIngredients(recipeId)
+                                delay(500) //TODO NOT OPTIMAL
+                                viewModel.refreshIngredients()
                             }
                         }
-//                            viewModel.refreshIngredients()
                     )
                 }
             }
@@ -370,35 +382,38 @@ fun OneRecipeScreen(
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text("Select Ingredient", style = MaterialTheme.typography.titleMedium)
                         Spacer(Modifier.height(8.dp))
-                            LazyColumn(
-                                modifier = Modifier.weight(1f),
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                items(allIngredients) { ingredient ->
-                                    val isSelected = selectedIngredients.contains(ingredient)
-                                    Card(
-                                        shape = RoundedCornerShape(12.dp),
-                                        colors = CardDefaults.cardColors(
-                                            containerColor = if (isSelected) SunnyYellow else MaterialTheme.colorScheme.surface
-                                        ),
+                        LazyColumn(
+                            modifier = Modifier.weight(1f),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(allIngredients) { ingredient ->
+                                val isSelected = selectedIngredients.contains(ingredient)
+                                Card(
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = if (isSelected) SunnyYellow else MaterialTheme.colorScheme.surface
+                                    ),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable { viewModel.toggleIngredientSelection(ingredient) }
+                                ) {
+                                    Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .clickable { viewModel.toggleIngredientSelection(ingredient) }
+                                            .padding(16.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        Row(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(16.dp),
-                                            horizontalArrangement = Arrangement.SpaceBetween,
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            Text(text = ingredient.name, style = MaterialTheme.typography.bodyLarge)
-                                            Text(
-                                                text = "${ingredient.quantity} ${ingredient.unit}",
-                                                style = MaterialTheme.typography.bodyMedium
-                                            )
-                                        }
+                                        Text(
+                                            text = ingredient.name,
+                                            style = MaterialTheme.typography.bodyLarge
+                                        )
+                                        Text(
+                                            text = "${ingredient.quantity} ${ingredient.unit}",
+                                            style = MaterialTheme.typography.bodyMedium
+                                        )
                                     }
+                                }
                             }
                         }
                         Spacer(Modifier.height(8.dp))
@@ -409,7 +424,6 @@ fun OneRecipeScreen(
                             showAddExistingIngredientPopup = false
                             editedIngredients.clear()
                             editedIngredients.addAll(selectedIngredients)
-                        //viewModel.updateRecipeDetails(recipeId, editedIngredients)
                         }) {
                             Text("Submit")
                         }

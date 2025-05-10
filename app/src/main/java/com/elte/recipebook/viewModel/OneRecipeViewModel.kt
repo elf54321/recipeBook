@@ -77,15 +77,12 @@ class OneRecipeViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
-    fun refreshIngredients(recipeId: Int) {
+    fun refreshIngredients() {
         viewModelScope.launch {
-            getRecipeDetails(recipeId)
-            viewModelScope.launch {
-                ingredientDao.getAllIngredients()
-                    .collect { list ->
-                        _allIngredients.value = list
-                    }
-            }
+            ingredientDao.getAllIngredients()
+                .collect { list ->
+                    _allIngredients.value = list
+                }
         }
     }
 
