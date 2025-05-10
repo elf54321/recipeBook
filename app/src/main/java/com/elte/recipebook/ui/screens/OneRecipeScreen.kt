@@ -1,16 +1,26 @@
 package com.elte.recipebook.ui.screens
 
+import android.net.Uri
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -20,37 +30,115 @@ import coil.compose.rememberAsyncImagePainter
 import com.elte.recipebook.viewModel.OneRecipeViewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import com.elte.recipebook.data.entities.Ingredient
 import com.elte.recipebook.ui.theme.SoftBackground
+import com.elte.recipebook.ui.theme.SunnyYellow
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
 fun OneRecipeScreen(
     recipeId: Int,
     navigateToRoute: (String) -> Unit,
+    navController: NavHostController,
     modifier: Modifier = Modifier,
     viewModel: OneRecipeViewModel = viewModel(key = "recipe_$recipeId")
 ) {
     val recipe by viewModel.recipe.observeAsState()
     val ingredients by viewModel.ingredients.observeAsState(emptyList())
+    val allIngredients by viewModel.allIngredients.collectAsState()
+    val selectedIngredients = viewModel.selectedIngredients
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+    val editedIngredients = remember { mutableStateListOf<Ingredient>() }
 
+
+    var editedTitle by remember { mutableStateOf("") }
+    var editedDescription by remember { mutableStateOf("") }
+    var editedImageUri by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(ingredients) {
+        editedIngredients.clear()
+        editedIngredients.addAll(ingredients.map { it.ingredient.copy() })
+    }
     LaunchedEffect(recipeId) {
         viewModel.getRecipeDetails(recipeId)
     }
+    LaunchedEffect(recipe) {
+        recipe?.let {
+            editedTitle = it.name
+            editedDescription = it.description
+            editedImageUri = it.imageUri
+        }
+    }
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var showIngredientPopup by remember { mutableStateOf(false) }
+    var showAddExistingIngredientPopup by remember { mutableStateOf(false) }
+    var isEditing by remember { mutableStateOf(false) }
 
-
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        editedImageUri = uri.toString()
+    }
     Box(
         modifier = modifier
             .fillMaxSize()
             .padding(horizontal = 12.dp)
             .background(SoftBackground)
+            .verticalScroll(rememberScrollState()) // This will make the column scrollable
+
     ) {
         recipe?.let {
             Box(modifier = Modifier.fillMaxSize()) {
+                IconButton(
+                    onClick = {
+                        if (isEditing) {
+                            viewModel.updateRecipeDetails(
+                                recipeId,
+                                editedTitle,
+                                editedDescription,
+                                editedImageUri,
+                                editedIngredients.toList()
+                            )
+                        }
+                        isEditing = !isEditing
+                    },
+                    modifier = Modifier.align(Alignment.TopStart)
+                ) {
+                    Icon(
+                        imageVector = if (isEditing) Icons.Default.Check else Icons.Default.Edit,
+                        contentDescription = if (isEditing) "Save" else "Edit",
+                        tint = Color.Black
+                    )
+                }
+                if (isEditing) {
+                    IconButton(
+                        onClick = {
+                            editedTitle = it.name
+                            editedDescription = it.description
+                            editedImageUri = it.imageUri
+                            editedIngredients.clear()
+                            editedIngredients.addAll(ingredients.map { it.ingredient.copy() })
+                            isEditing = false
+                        },
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .padding(40.dp, 0.dp, 0.dp, 0.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Cancel Edit",
+                            tint = Color.Black
+                        )
+                    }
+                }
 
                 IconButton(
                     onClick = { showDeleteDialog = true },
@@ -66,12 +154,15 @@ fun OneRecipeScreen(
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(16.dp),
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier
+                        .fillMaxSize()
                         .padding(top = 56.dp)
                 ) {
-                    if (it.imageUri != null) {
+                    val imageToDisplay = if (isEditing) editedImageUri else it.imageUri
+
+                    if (!imageToDisplay.isNullOrBlank()) {
                         Image(
-                            painter = rememberAsyncImagePainter(it.imageUri.toUri()),
+                            painter = rememberAsyncImagePainter(imageToDisplay.toUri()),
                             contentDescription = null,
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -90,53 +181,140 @@ fun OneRecipeScreen(
                             Text("No Image", color = Color.DarkGray)
                         }
                     }
+                    if (isEditing) {
+                        Button(
+                            onClick = { launcher.launch("image/*") }
+                        ) {
+                            Text("Change Image")
+                        }
+                    }
 
-                    Text(it.name, style = MaterialTheme.typography.headlineSmall)
-                    Text(it.description, style = MaterialTheme.typography.bodyMedium)
+                    if (isEditing) {
+                        OutlinedTextField(
+                            value = editedTitle,
+                            onValueChange = { editedTitle = it },
+                            label = { Text("Title") }
+                        )
+                        OutlinedTextField(
+                            value = editedDescription,
+                            onValueChange = { editedDescription = it },
+                            label = { Text("Description") }
+                        )
+
+                    } else {
+                        Text(it.name, style = MaterialTheme.typography.headlineSmall)
+                        Text(it.description, style = MaterialTheme.typography.bodyMedium)
+                    }
 
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = 16.dp)
                     ) {
-                        ingredients.forEach { (ingredient, nutrition) ->
-                            var showInfo by remember { mutableStateOf(false) }
-
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(8.dp)
-                                    .background(Color.White)
-                                    .padding(12.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text(ingredient.price.toString(), modifier = Modifier.weight(1f)) // Replace with actual quantity
-                                Text(ingredient.priceCurrency, modifier = Modifier.weight(1f)) // Replace with unit
-                                Text(ingredient.name, modifier = Modifier.weight(2f))
-                                IconButton(onClick = { showInfo = true }) {
-                                    Icon(Icons.Default.Info, contentDescription = "Nutritional Info")
+                        if (isEditing) {
+                            editedIngredients.forEachIndexed { index, ingredient ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 4.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    OutlinedTextField(
+                                        value = ingredient.quantity.toString(),
+                                        onValueChange = {
+                                            editedIngredients[index] =
+                                                ingredient.copy(quantity = it.toDouble())
+                                        },
+                                        label = { Text("Qty") },
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    OutlinedTextField(
+                                        value = ingredient.unit,
+                                        onValueChange = {
+                                            editedIngredients[index] = ingredient.copy(unit = it)
+                                        },
+                                        label = { Text("Unit") },
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    OutlinedTextField(
+                                        value = ingredient.name,
+                                        onValueChange = {
+                                            editedIngredients[index] = ingredient.copy(name = it)
+                                        },
+                                        label = { Text("Name") },
+                                        modifier = Modifier.weight(2f)
+                                    )
                                 }
                             }
 
-                            if (showInfo) {
-                                AlertDialog(
-                                    onDismissRequest = { showInfo = false },
-                                    title = { Text("Nutrition Info") },
-                                    text = {
-                                        Text("${nutrition.energy} kcal, ${nutrition.fat}g fat, ${nutrition.protein}g protein, " +
-                                                "${nutrition.carbohydrate}g carbs, ${nutrition.sugar}g sugar, ${nutrition.salt}g salt, ${nutrition.fiber}g fiber")
-                                    },
-                                    confirmButton = {
-                                        TextButton(onClick = { showInfo = false }) {
-                                            Text("OK")
-                                        }
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Button(
+                                    onClick = { showIngredientPopup = true },
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Text("New Ingredient")
+                                }
+                                Button(
+                                    onClick = { showAddExistingIngredientPopup = true },
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Text("Edit Existing")
+                                }
+                            }
+
+                        } else {
+                            ingredients.forEach { (ingredient, nutrition) ->
+                                var showInfo by remember { mutableStateOf(false) }
+
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .background(Color.White)
+                                        .padding(12.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(
+                                        ingredient.quantity.toString(),
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    Text(
+                                        ingredient.unit,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    Text(ingredient.name, modifier = Modifier.weight(2f))
+                                    IconButton(onClick = { showInfo = true }) {
+                                        Icon(
+                                            Icons.Default.Info,
+                                            contentDescription = "Nutritional Info"
+                                        )
                                     }
-                                )
+                                }
+
+                                if (showInfo) {
+                                    AlertDialog(
+                                        onDismissRequest = { showInfo = false },
+                                        title = { Text("Nutrition Info") },
+                                        text = {
+                                            Text(
+                                                "${nutrition.energy} kcal, ${nutrition.fat}g fat, ${nutrition.protein}g protein, " +
+                                                        "${nutrition.carbohydrate}g carbs, ${nutrition.sugar}g sugar, ${nutrition.salt}g salt, ${nutrition.fiber}g fiber"
+                                            )
+                                        },
+                                        confirmButton = {
+                                            TextButton(onClick = { showInfo = false }) {
+                                                Text("OK")
+                                            }
+                                        }
+                                    )
+                                }
                             }
                         }
                     }
-
                 }
             }
         } ?: run {
@@ -171,5 +349,89 @@ fun OneRecipeScreen(
                 }
             )
         }
+        if (showIngredientPopup) {
+            Dialog(onDismissRequest = { showIngredientPopup = false }) {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    shape = RoundedCornerShape(16.dp),
+                    tonalElevation = 8.dp
+                ) {
+                    CreateNewIngredientsScreen(
+                        navController = navController,
+                        parentEntity = "recipe/{recipeId}",
+                        onIngredientCreated = {
+                            navController.getBackStackEntry("recipe/{recipeId}")
+                            showIngredientPopup = false
+                            coroutineScope.launch {
+                                delay(500) //TODO NOT OPTIMAL
+                                viewModel.refreshIngredients()
+                            }
+                        }
+                    )
+                }
+            }
+        }
+        if (showAddExistingIngredientPopup) {
+            Dialog(onDismissRequest = { showAddExistingIngredientPopup = false }) {
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    tonalElevation = 8.dp,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text("Select Ingredient", style = MaterialTheme.typography.titleMedium)
+                        Spacer(Modifier.height(8.dp))
+                        LazyColumn(
+                            modifier = Modifier.weight(1f),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(allIngredients) { ingredient ->
+                                val isSelected = selectedIngredients.contains(ingredient)
+                                Card(
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = if (isSelected) SunnyYellow else MaterialTheme.colorScheme.surface
+                                    ),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable { viewModel.toggleIngredientSelection(ingredient) }
+                                ) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(16.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = ingredient.name,
+                                            style = MaterialTheme.typography.bodyLarge
+                                        )
+                                        Text(
+                                            text = "${ingredient.quantity} ${ingredient.unit}",
+                                            style = MaterialTheme.typography.bodyMedium
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                        Spacer(Modifier.height(8.dp))
+                        TextButton(onClick = { showAddExistingIngredientPopup = false }) {
+                            Text("Cancel")
+                        }
+                        TextButton(onClick = {
+                            showAddExistingIngredientPopup = false
+                            editedIngredients.clear()
+                            editedIngredients.addAll(selectedIngredients)
+                        }) {
+                            Text("Submit")
+                        }
+                    }
+                }
+            }
+        }
+
+
     }
 }
