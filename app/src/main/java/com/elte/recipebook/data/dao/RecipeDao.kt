@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import com.elte.recipebook.data.entities.Ingredient
 import com.elte.recipebook.data.entities.Recipe
 import com.elte.recipebook.data.entities.RecipeIngredientCrossRef
@@ -48,4 +49,12 @@ interface RecipeDao {
       WHERE rc.recipeId = :recipeId
     """)
     suspend fun getIngredientsByRecipeId(recipeId: Int): List<Ingredient>
+
+
+    @Query("DELETE FROM recipe_ingredient_cross_ref WHERE recipeId = :recipeId")
+    suspend fun deleteCrossRefsByRecipeId(recipeId: Int)
+
+    @Update
+    suspend fun update(recipe: Recipe)
+
 }

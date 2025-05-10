@@ -3,7 +3,10 @@ package com.elte.recipebook.ui.screens
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -27,7 +30,9 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import com.elte.recipebook.data.entities.Ingredient
 import com.elte.recipebook.ui.theme.SoftBackground
+import com.elte.recipebook.ui.theme.SunnyYellow
 import kotlinx.coroutines.launch
 
 @Composable
@@ -40,16 +45,36 @@ fun OneRecipeScreen(
 ) {
     val recipe by viewModel.recipe.observeAsState()
     val ingredients by viewModel.ingredients.observeAsState(emptyList())
+    val allIngredients by viewModel.allIngredients.collectAsState()
+    val selectedIngredients = viewModel.selectedIngredients
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+    val editedIngredients = remember { mutableStateListOf<Ingredient>() }
 
+
+    var editedTitle by remember { mutableStateOf("") }
+    var editedDescription by remember { mutableStateOf("") }
+    var editedImageUri by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(ingredients) {
+        editedIngredients.clear()
+        editedIngredients.addAll(ingredients.map { it.ingredient.copy() })
+    }
     LaunchedEffect(recipeId) {
         viewModel.getRecipeDetails(recipeId)
     }
+    LaunchedEffect(recipe) {
+        recipe?.let {
+            editedTitle = it.name
+            editedDescription = it.description
+            editedImageUri = it.imageUri
+        }
+    }
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showIngredientPopup by remember { mutableStateOf(false) }
-    var isEditing by remember { mutableStateOf(false) }
+    var showAddExistingIngredientPopup by remember { mutableStateOf(false) }
 
+    var isEditing by remember { mutableStateOf(false) }
 
     Box(
         modifier = modifier
@@ -60,7 +85,18 @@ fun OneRecipeScreen(
         recipe?.let {
             Box(modifier = Modifier.fillMaxSize()) {
                 IconButton(
-                    onClick = { isEditing = !isEditing },
+                    onClick = {
+                        if (isEditing) {
+                            viewModel.updateRecipeDetails(
+                                recipeId,
+                                editedTitle,
+                                editedDescription,
+                                editedImageUri,
+                                editedIngredients.toList()
+                            )
+                        }
+                        isEditing = !isEditing
+                              },
                     modifier = Modifier.align(Alignment.TopStart)
                 ) {
                     Icon(
@@ -116,15 +152,16 @@ fun OneRecipeScreen(
 
                     if (isEditing) {
                         OutlinedTextField(
-                            value = "22",//editedTitle,
-                            onValueChange = { },//editedTitle = it },
+                            value = editedTitle,
+                            onValueChange = { editedTitle = it },
                             label = { Text("Title") }
                         )
                         OutlinedTextField(
-                            value = "22",//editedDescription,
-                            onValueChange = {},// editedDescription = it },
+                            value = editedDescription,
+                            onValueChange = { editedDescription = it },
                             label = { Text("Description") }
                         )
+
                     } else {
                         Text(it.name, style = MaterialTheme.typography.headlineSmall)
                         Text(it.description, style = MaterialTheme.typography.bodyMedium)
@@ -136,8 +173,7 @@ fun OneRecipeScreen(
                             .padding(top = 16.dp)
                     ) {
                         if (isEditing) {
-                            ingredients.forEach { (ingredient, nutrition) ->
-                                //ingredients.forEachIndexed { index, (ingredient, _) ->
+                            editedIngredients.forEachIndexed { index, ingredient ->
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -146,33 +182,52 @@ fun OneRecipeScreen(
                                 ) {
                                     OutlinedTextField(
                                         value = ingredient.quantity.toString(),
-                                        onValueChange = { /* update */ },
+                                        onValueChange = {
+                                            editedIngredients[index] = ingredient.copy(quantity = it.toDouble())
+                                        },
                                         label = { Text("Qty") },
                                         modifier = Modifier.weight(1f)
                                     )
                                     OutlinedTextField(
                                         value = ingredient.unit,
-                                        onValueChange = { /* update */ },
+                                        onValueChange = {
+                                            editedIngredients[index] = ingredient.copy(unit = it)
+                                        },
                                         label = { Text("Unit") },
                                         modifier = Modifier.weight(1f)
                                     )
                                     OutlinedTextField(
                                         value = ingredient.name,
-                                        onValueChange = { /* update */ },
+                                        onValueChange = {
+                                            editedIngredients[index] = ingredient.copy(name = it)
+                                        },
                                         label = { Text("Name") },
                                         modifier = Modifier.weight(2f)
                                     )
-                                    IconButton(onClick = { {} }) {}//removeIngredient(index) }) {
-                                    Icon(Icons.Default.Delete, contentDescription = "Remove")
+                                    IconButton(onClick = {
+                                        editedIngredients.removeAt(index)
+                                    }) {
+                                        Icon(Icons.Default.Delete, contentDescription = "Remove")
+                                    }
                                 }
                             }
 
-                            Button(
-                                onClick = { showIngredientPopup = true },
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Text("Add Ingredient")
+
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Button(
+                                    onClick = { showIngredientPopup = true },
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Text("New Ingredient")
+                                }
+                                Button(
+                                    onClick = { showAddExistingIngredientPopup = true },
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Text("Add Existing")
+                                }
                             }
+
                         } else {
                             ingredients.forEach { (ingredient, nutrition) ->
                                 var showInfo by remember { mutableStateOf(false) }
@@ -188,11 +243,11 @@ fun OneRecipeScreen(
                                     Text(
                                         ingredient.quantity.toString(),
                                         modifier = Modifier.weight(1f)
-                                    ) // Replace with actual quantity
+                                    )
                                     Text(
                                         ingredient.unit,
                                         modifier = Modifier.weight(1f)
-                                    ) // Replace with unit
+                                    )
                                     Text(ingredient.name, modifier = Modifier.weight(2f))
                                     IconButton(onClick = { showInfo = true }) {
                                         Icon(
@@ -269,12 +324,74 @@ fun OneRecipeScreen(
                         onIngredientCreated = {
                             navController.getBackStackEntry("recipe/{recipeId}")
                             showIngredientPopup = false
+                            coroutineScope.launch {
+                                viewModel.refreshIngredients(recipeId)
+                            }
                         }
 //                            viewModel.refreshIngredients()
                     )
                 }
             }
         }
+        if (showAddExistingIngredientPopup) {
+            Dialog(onDismissRequest = { showAddExistingIngredientPopup = false }) {
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    tonalElevation = 8.dp,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text("Select Ingredient", style = MaterialTheme.typography.titleMedium)
+                        Spacer(Modifier.height(8.dp))
+                            LazyColumn(
+                                modifier = Modifier.weight(1f),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                items(allIngredients) { ingredient ->
+                                    val isSelected = selectedIngredients.contains(ingredient)
+                                    Card(
+                                        shape = RoundedCornerShape(12.dp),
+                                        colors = CardDefaults.cardColors(
+                                            containerColor = if (isSelected) SunnyYellow else MaterialTheme.colorScheme.surface
+                                        ),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clickable { viewModel.toggleIngredientSelection(ingredient) }
+                                    ) {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(16.dp),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text(text = ingredient.name, style = MaterialTheme.typography.bodyLarge)
+                                            Text(
+                                                text = "${ingredient.quantity} ${ingredient.unit}",
+                                                style = MaterialTheme.typography.bodyMedium
+                                            )
+                                        }
+                                    }
+                            }
+                        }
+                        Spacer(Modifier.height(8.dp))
+                        TextButton(onClick = { showAddExistingIngredientPopup = false }) {
+                            Text("Cancel")
+                        }
+                        TextButton(onClick = {
+                            showAddExistingIngredientPopup = false
+                            editedIngredients.clear()
+                            editedIngredients.addAll(selectedIngredients)
+                        //viewModel.updateRecipeDetails(recipeId, editedIngredients)
+                        }) {
+                            Text("Submit")
+                        }
+                    }
+                }
+            }
+        }
+
 
     }
 }
