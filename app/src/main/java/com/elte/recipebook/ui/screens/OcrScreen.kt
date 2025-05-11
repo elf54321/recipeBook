@@ -1,5 +1,6 @@
 package com.elte.recipebook.ui.screens
 
+import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
@@ -13,19 +14,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,9 +37,11 @@ import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.navigation.NavHostController
 import com.elte.recipebook.ui.theme.DeepText
 import com.elte.recipebook.ui.theme.SoftBackground
 import com.elte.recipebook.ui.theme.SunnyYellow
+import com.elte.recipebook.viewModel.AddRecipeViewModel
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
@@ -52,21 +51,32 @@ import com.mr0xf00.easycrop.crop
 import com.mr0xf00.easycrop.rememberImageCropper
 import com.mr0xf00.easycrop.ui.ImageCropperDialog
 import kotlinx.coroutines.launch
+import androidx.hilt.navigation.compose.hiltViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 
+@SuppressLint("UnrememberedGetBackStackEntry")
 @Composable
-fun OcrScreen(modifier: Modifier = Modifier) {
-    val context = LocalContext.current
+fun OcrScreen(
+    modifier: Modifier = Modifier,
+    navigateToStep: () -> Unit,
+    navController: NavHostController
+) {
+    val parentEntry = remember(navController.getBackStackEntry("ocr")) {
+        navController.getBackStackEntry("ocr")
+    }
+    val viewModel: AddRecipeViewModel = hiltViewModel(parentEntry)
+    LaunchedEffect(viewModel.description) {
+        Log.d("AddRecipeScreen", "Description updated: $viewModel.description")
+    }
+
+        val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var isProcessing by remember { mutableStateOf(false) }
 
     val imageCropper = rememberImageCropper()
-    var croppedBitmapIngredients by remember { mutableStateOf<ImageBitmap?>(null) }
     var croppedBitmapInstructions by remember { mutableStateOf<ImageBitmap?>(null) }
-
-    var extractedIngredients by remember { mutableStateOf<String?>(null) }
-    var extractedInstructions by remember { mutableStateOf<String?>(null) }
-
-    var currentPicker by remember { mutableStateOf(1) }
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -76,11 +86,7 @@ fun OcrScreen(modifier: Modifier = Modifier) {
                 val result = imageCropper.crop(uri, context)
                 when (result) {
                     is CropResult.Success -> {
-                        if (currentPicker == 1) {
-                            croppedBitmapIngredients = result.bitmap
-                        } else {
-                            croppedBitmapInstructions = result.bitmap
-                        }
+                        croppedBitmapInstructions = result.bitmap
                     }
                     is CropResult.Cancelled -> {
                         Log.d("OcrScreen", "Cropping cancelled")
@@ -93,7 +99,11 @@ fun OcrScreen(modifier: Modifier = Modifier) {
         }
     }
 
-    fun runTextRecognition(bitmap: Bitmap, onTextExtracted: (String) -> Unit) {
+    fun runTextRecognition(
+        bitmap: Bitmap,
+        viewModel: AddRecipeViewModel,
+        onNavigate: () -> Unit)
+    {
         isProcessing = true
         try {
             val safeBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
@@ -102,18 +112,33 @@ fun OcrScreen(modifier: Modifier = Modifier) {
             val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
             recognizer.process(inputImage)
                 .addOnSuccessListener { visionText ->
-                    onTextExtracted(visionText.text)
+                    val extractedText = visionText.text
+                    CoroutineScope(Dispatchers.Main).launch {
+                        delay(100)
+                    }
+                    if (extractedText.isNotBlank()) {
+                        viewModel.onDescriptionChange(extractedText)
+                    }
+                    else{
+                        viewModel.onDescriptionChange("Text could not be extracted")
+                    }
+                    CoroutineScope(Dispatchers.Main).launch {
+                        delay(100)
+                    }
+                    onNavigate()
                     isProcessing = false
                 }
                 .addOnFailureListener {
                     Log.e("OcrScreen", "OCR failed: ${it.message}")
-                    onTextExtracted("Failed to extract text.")
+                    viewModel.onDescriptionChange("Text could not be extracted")
+                    onNavigate()
                     isProcessing = false
                 }
         }
         catch (e: Exception) {
             Log.e("OCR", "Internal OCR error", e)
-            onTextExtracted("Internal error: ${e.localizedMessage}")
+            viewModel.onDescriptionChange("Text could not be extracted")
+            onNavigate()
             isProcessing = false
         }
     }
@@ -146,31 +171,6 @@ fun OcrScreen(modifier: Modifier = Modifier) {
                 )
                 Button(
                     onClick = {
-                        currentPicker = 1
-                        imagePickerLauncher.launch("image/*")
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = SunnyYellow),
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
-                    enabled = !isProcessing
-                ) {
-                    Text("Pick Photo for Ingredients", color = Color.Black)
-                }
-
-                croppedBitmapIngredients?.let { bitmap ->
-                    Text("Ingredients:", color = DeepText)
-                    Image(
-                        bitmap = bitmap,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(200.dp)
-                            .background(Color.LightGray, shape = RoundedCornerShape(16.dp))
-                    )
-                }
-
-                Button(
-                    onClick = {
-                        currentPicker = 2
                         imagePickerLauncher.launch("image/*")
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = SunnyYellow),
@@ -194,14 +194,30 @@ fun OcrScreen(modifier: Modifier = Modifier) {
 
                 Button(
                     onClick = {
-                       croppedBitmapIngredients?.let { runTextRecognition(it.asAndroidBitmap()) { extractedIngredients = it } }
-                       croppedBitmapInstructions?.let { runTextRecognition(it.asAndroidBitmap()) { extractedInstructions = it } }
+                       croppedBitmapInstructions?.let { runTextRecognition(
+                           bitmap = it.asAndroidBitmap(),
+                           viewModel = viewModel,
+                           onNavigate = {
+                               navController.navigate("add")
+                           }
+                       ) }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF90CAF9)),
                     modifier = Modifier.align(Alignment.CenterHorizontally),
                     enabled = !isProcessing
                 ) {
-                    Text("Extract Text from Images", color = Color.Black)
+                    Text("Extract", color = Color.Black)
+                }
+
+                Button(
+                    onClick = {
+                        navController.navigate("add")
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF90CAF9)),
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    enabled = !isProcessing
+                ) {
+                    Text("Skip", color = Color.Black)
                 }
             }
         }

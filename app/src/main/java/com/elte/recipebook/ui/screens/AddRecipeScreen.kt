@@ -30,12 +30,10 @@ import androidx.navigation.NavHostController
 fun AddRecipeScreen(
     modifier: Modifier = Modifier,
     navigateToStep: () -> Unit,
-    navController: NavHostController
+    navController: NavHostController,
 ) {
-    // scope ViewModel to the "add" entry
-    val parentEntry = remember(navController.getBackStackEntry("add")) {
-        navController.getBackStackEntry("add")
-    }
+    // scope ViewModel to the "ocr" entry
+    val parentEntry = remember { navController.getBackStackEntry("ocr") }
     val viewModel: AddRecipeViewModel = hiltViewModel(parentEntry)
     val context = LocalContext.current
 

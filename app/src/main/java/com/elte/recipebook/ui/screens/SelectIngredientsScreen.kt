@@ -33,8 +33,8 @@ fun SelectIngredientsScreen(
     navController: NavHostController,
     onAddNewIngredient: () -> Unit,
     onDone:            () -> Unit
-) {    // Obtain the shared ViewModel from the "add" nav entry
-    val parentEntry = remember { navController.getBackStackEntry("add") }
+) {    // Obtain the shared ViewModel from the "ocr" nav entry
+    val parentEntry = remember { navController.getBackStackEntry("ocr") }
     val viewModel: AddRecipeViewModel = hiltViewModel(parentEntry)
 
     // Observe all ingredients and the current selection
