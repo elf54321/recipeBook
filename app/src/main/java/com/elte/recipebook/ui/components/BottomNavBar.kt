@@ -13,8 +13,8 @@ data class BottomNavItem(val route: String, val icon: ImageVector, val label: St
 val bottomNavItems = listOf(
     BottomNavItem("home", Icons.Default.Home, "Home"),
     BottomNavItem("saved", Icons.Default.Favorite, "Saved"),
-    BottomNavItem("add", Icons.Default.Add, "Add"),
-    BottomNavItem("ocr", Icons.Default.Add, "OCR"),
+    // add recipe starts from ocr
+    BottomNavItem("ocr", Icons.Default.Add, "Add"),
     BottomNavItem("grocery", Icons.Default.ShoppingCart, "Grocery"),
     BottomNavItem("recipe/{recipeId}", Icons.Default.Receipt, "Recipe")
 )

@@ -1,12 +1,17 @@
 package com.elte.recipebook.nav
 
+import android.annotation.SuppressLint
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.elte.recipebook.ui.screens.*
+import com.elte.recipebook.viewModel.AddRecipeViewModel
 
+@SuppressLint("UnrememberedGetBackStackEntry")
 @Composable
 fun RecipeNavGraph(
     navController: NavHostController,
@@ -16,11 +21,17 @@ fun RecipeNavGraph(
     NavHost(navController = navController, startDestination = "home") {
         composable("home")    { HomeScreen(navigateToRoute, modifier) }
         composable("saved")   { SavedScreen(modifier) }
+        composable("ocr")      {
+            // Navigation change: now the add process starts from ocr
+            OcrScreen(modifier = modifier,
+                      navigateToStep = { navigateToRoute("add") },
+                      navController  = navController)
+        }
         composable("add")     {
             AddRecipeScreen(
                 modifier       = modifier,
                 navigateToStep = { navigateToRoute("add/details") },
-                navController  = navController
+                navController  = navController,
             )
         }
         composable("add/details") {
@@ -65,7 +76,6 @@ fun RecipeNavGraph(
             )
         }
 
-        composable("ocr")      { OcrScreen(modifier) }
         composable("grocery")  { GroceryScreen(modifier) }
         composable("recipe/{recipeId}") { backStackEntry ->
             val recipeId = backStackEntry.arguments

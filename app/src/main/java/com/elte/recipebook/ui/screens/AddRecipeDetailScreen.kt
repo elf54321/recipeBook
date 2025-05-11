@@ -48,7 +48,7 @@ fun AddRecipeDetailScreen(
 ) {
 
     val context = LocalContext.current
-    val parentEntry = remember { navController.getBackStackEntry("add") }
+    val parentEntry = remember { navController.getBackStackEntry("ocr") }
     val viewModel: AddRecipeViewModel = hiltViewModel(parentEntry)
 
     val portionText by remember { derivedStateOf { viewModel.portionText } }
