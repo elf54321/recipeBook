@@ -202,7 +202,7 @@ fun OcrScreen(
                            }
                        ) }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF90CAF9)),
+                    colors = ButtonDefaults.buttonColors(containerColor = SunnyYellow),
                     modifier = Modifier.align(Alignment.CenterHorizontally),
                     enabled = !isProcessing
                 ) {
