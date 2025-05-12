@@ -9,6 +9,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,6 +25,7 @@ import com.elte.recipebook.ui.theme.SoftBackground
 import com.elte.recipebook.ui.theme.DeepText
 import androidx.core.net.toUri
 import androidx.navigation.NavHostController
+import androidx.compose.material.icons.filled.ArrowBack
 
 @SuppressLint("UnrememberedGetBackStackEntry")
 @Composable
@@ -54,6 +56,18 @@ fun AddRecipeScreen(
             .fillMaxSize()
             .background(SoftBackground)
     ) {
+        IconButton(
+            onClick = { navController.popBackStack() },
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(16.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.ArrowBack,
+                contentDescription = "Back",
+                tint = Color.Black
+            )
+        }
         Column(
             modifier = Modifier
                 .fillMaxSize()
