@@ -169,6 +169,12 @@ fun OcrScreen(
                     color = DeepText,
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
+                Text(
+                    text = "To extract, upload a picture and crop it so that only the instructions are visible.",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = DeepText,
+                    modifier = Modifier.align(Alignment.Start)
+                )
                 Button(
                     onClick = {
                         imagePickerLauncher.launch("image/*")

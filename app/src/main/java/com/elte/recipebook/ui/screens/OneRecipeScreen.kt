@@ -33,12 +33,14 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.window.Dialog
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.elte.recipebook.data.entities.Ingredient
 import com.elte.recipebook.ui.theme.SoftBackground
 import com.elte.recipebook.ui.theme.SunnyYellow
+import com.elte.recipebook.viewModel.ShoppingListViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -87,6 +89,9 @@ fun OneRecipeScreen(
     ) { uri: Uri? ->
         editedImageUri = uri.toString()
     }
+    val sharedViewModel: ShoppingListViewModel = hiltViewModel()
+    val shoppingListManager = sharedViewModel.shoppingListManager
+
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -432,6 +437,14 @@ fun OneRecipeScreen(
             }
         }
 
-
+        Button(
+            onClick = {
+                shoppingListManager.addIngredients(ingredients.map { i -> i.ingredient })
+                navController.navigate("grocery")
+            },
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF90CAF9)),
+        ) {
+            Text("Add to Grocery List", color = Color.Black)
+        }
     }
 }
