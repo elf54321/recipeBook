@@ -172,6 +172,18 @@ fun OcrScreen(
                     .fillMaxWidth()
                     .align(Alignment.Center)
             ) {
+                Text(
+                    text = "\uD83C\uDF73 Add a New Recipe with OCR",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = DeepText,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+                Text(
+                    text = "To extract, upload a picture and crop it so that only the instructions are visible.",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = DeepText,
+                    modifier = Modifier.align(Alignment.Start)
+                )
                 Button(
                     onClick = { imagePickerLauncher.launch("image/*") },
                     shape = RoundedCornerShape(50),
