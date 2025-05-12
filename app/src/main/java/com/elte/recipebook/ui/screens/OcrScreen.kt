@@ -11,11 +11,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.DrawerDefaults.shape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -102,8 +104,8 @@ fun OcrScreen(
     fun runTextRecognition(
         bitmap: Bitmap,
         viewModel: AddRecipeViewModel,
-        onNavigate: () -> Unit)
-    {
+        onNavigate: () -> Unit
+    ) {
         isProcessing = true
         try {
             val safeBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
@@ -118,8 +120,7 @@ fun OcrScreen(
                     }
                     if (extractedText.isNotBlank()) {
                         viewModel.onDescriptionChange(extractedText)
-                    }
-                    else{
+                    } else {
                         viewModel.onDescriptionChange("Text could not be extracted")
                     }
                     CoroutineScope(Dispatchers.Main).launch {
@@ -134,15 +135,13 @@ fun OcrScreen(
                     onNavigate()
                     isProcessing = false
                 }
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             Log.e("OCR", "Internal OCR error", e)
             viewModel.onDescriptionChange("Text could not be extracted")
             onNavigate()
             isProcessing = false
         }
     }
-
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -152,16 +151,26 @@ fun OcrScreen(
                 )
             )
     ) {
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(24.dp),
-            verticalArrangement = Arrangement.SpaceBetween,
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(24.dp)
         ) {
+            Text(
+                text = "\uD83C\uDF73 Add a New Recipe with OCR",
+                style = MaterialTheme.typography.headlineSmall,
+                color = DeepText,
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = 32.dp)
+            )
+
             Column(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier.fillMaxWidth()
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.Center)
             ) {
                 Text(
                     text = "\uD83C\uDF73 Add a New Recipe with OCR",
@@ -176,14 +185,16 @@ fun OcrScreen(
                     modifier = Modifier.align(Alignment.Start)
                 )
                 Button(
-                    onClick = {
-                        imagePickerLauncher.launch("image/*")
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = SunnyYellow),
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    onClick = { imagePickerLauncher.launch("image/*") },
+                    shape = RoundedCornerShape(50),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = SunnyYellow,
+                        contentColor = Color.Black
+                    ),
+                    modifier = Modifier.fillMaxWidth(),
                     enabled = !isProcessing
                 ) {
-                    Text("Pick Photo for Instructions", color = Color.Black)
+                    Text("Pick Photo for Instructions")
                 }
 
                 croppedBitmapInstructions?.let { bitmap ->
@@ -197,50 +208,51 @@ fun OcrScreen(
                             .background(Color.LightGray, shape = RoundedCornerShape(16.dp))
                     )
                 }
-
                 Button(
                     onClick = {
-                       croppedBitmapInstructions?.let { runTextRecognition(
-                           bitmap = it.asAndroidBitmap(),
-                           viewModel = viewModel,
-                           onNavigate = {
-                               navController.navigate("add")
-                           }
-                       ) }
+                        croppedBitmapInstructions?.let {
+                            runTextRecognition(
+                                bitmap = it.asAndroidBitmap(),
+                                viewModel = viewModel,
+                                onNavigate = { navController.navigate("add") }
+                            )
+                        }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF90CAF9)),
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
-                    enabled = !isProcessing
+                    colors = ButtonDefaults.buttonColors(containerColor = SunnyYellow),
+                    shape = RoundedCornerShape(50),
+                    enabled = !isProcessing,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Extract", color = Color.Black)
+                    Text("Extract Text", color = Color.Black)
                 }
-
                 Button(
-                    onClick = {
-                        navController.navigate("add")
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF90CAF9)),
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    onClick = { navController.navigate("add") },
+                    shape = RoundedCornerShape(50),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.White,
+                        contentColor = Color.Black
+                    ),
+                    modifier = Modifier.fillMaxWidth(),
                     enabled = !isProcessing
                 ) {
-                    Text("Skip", color = Color.Black)
+                    Text("Skip")
+                }
+            }
+            if (isProcessing) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.5f))
+                        .zIndex(1f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = Color.White)
                 }
             }
         }
-        if (isProcessing) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.5f))
-                    .zIndex(1f),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(color = Color.White)
-            }
-        }
-    }
 
-    imageCropper.cropState?.let { cropState ->
-        ImageCropperDialog(state = cropState)
+        imageCropper.cropState?.let { cropState ->
+            ImageCropperDialog(state = cropState)
+        }
     }
 }
