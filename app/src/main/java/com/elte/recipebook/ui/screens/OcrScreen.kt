@@ -11,13 +11,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.DrawerDefaults.shape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -172,12 +170,6 @@ fun OcrScreen(
                     .fillMaxWidth()
                     .align(Alignment.Center)
             ) {
-                Text(
-                    text = "\uD83C\uDF73 Add a New Recipe with OCR",
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = DeepText,
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                )
                 Text(
                     text = "To extract, upload a picture and crop it so that only the instructions are visible.",
                     style = MaterialTheme.typography.labelLarge,

@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.elte.recipebook.ui.theme.DeepText
 import com.elte.recipebook.ui.theme.SoftBackground
+import com.elte.recipebook.ui.theme.SunnyYellow
 import com.elte.recipebook.viewModel.ShoppingListViewModel
 
 @Composable
@@ -60,7 +61,10 @@ fun GroceryScreen(modifier: Modifier = Modifier) {
                 onClick = {
                     shoppingListManager.clear()
                 },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF90CAF9)),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = SunnyYellow,
+                    contentColor = Color.Black
+                ),
             ) {
                 Text("Clear list", color = Color.Black)
             }

@@ -441,7 +441,10 @@ fun OneRecipeScreen(
                 shoppingListManager.addIngredients(ingredients.map { i -> i.ingredient })
                 navController.navigate("grocery")
             },
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF90CAF9)),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = SunnyYellow,
+                contentColor = Color.Black
+            ),
         ) {
             Text("Add to Grocery List", color = Color.Black)
         }
