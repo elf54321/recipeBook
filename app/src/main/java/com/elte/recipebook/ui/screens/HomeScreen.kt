@@ -24,47 +24,41 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
+import com.elte.recipebook.data.PriceCategory
+import com.elte.recipebook.data.TypeOfMeal
 import com.elte.recipebook.data.entities.Recipe
 import com.elte.recipebook.ui.components.FilterSection
 import com.elte.recipebook.ui.theme.SoftBackground
 import com.elte.recipebook.ui.theme.SunnyYellow
 import com.elte.recipebook.viewModel.ShowAllRecipeViewModel
 
+private val typeOfMealEmojis = mapOf(
+    TypeOfMeal.BREAKFAST to "🍳",
+    TypeOfMeal.LUNCH to "🍛",
+    TypeOfMeal.DINNER to "🍽",
+    TypeOfMeal.DESSERT to "🍰",
+    TypeOfMeal.SNACK to "🥪",
+    TypeOfMeal.DRINK to "🥤"
+)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(navigateToRoute: (String) -> Unit, modifier: Modifier = Modifier, viewModel: ShowAllRecipeViewModel = viewModel()) {
+fun HomeScreen(
+    navigateToRoute: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: ShowAllRecipeViewModel = viewModel()
+) {
     var searchQuery by remember { mutableStateOf(TextFieldValue("")) }
     var showFilterDialog by remember { mutableStateOf(false) }
-    val filters = listOf(
-        "🍽 All", "🥗 Vegetarian", "🌱 Vegan", "⏱ Quick", "🔥 Popular",
-        "🆕 New", "💪 Healthy", "🍰 Dessert", "🥖 Low-Carb", "🚫 Gluten-Free"
-    )
-    var selectedFilter by remember { mutableStateOf("🍽 All") }
-    /*val initialRecipes = listOf(
-        Recipe(name = "🍝 Quick Pasta Delight", description = "A fast and easy pasta dish."),
-        Recipe(name = "🥗 High-Protein Salad", description = "A nutritious and protein-rich salad."),
-        Recipe(name = "🍲 15-min Vegan Stew", description = "A quick and delicious vegan stew."),
-        Recipe(name = "🍛 Low-Carb Curry", description = "A flavorful low-carb curry."),
-        Recipe(name = "🥘 Grandma’s Goulash", description = "A comforting traditional goulash."),
-        Recipe(name = "🍜 Dorm-Friendly Ramen", description = "A simple and quick ramen recipe."),
-        Recipe(name = "🌮 Budget Taco Bowl", description = "An affordable and customizable taco bowl."),
-        Recipe(name = "🍳 Protein-Packed Breakfast", description = "A breakfast to fuel your day."),
-        Recipe(name = "🍰 Easy Healthy Dessert", description = "A guilt-free sweet treat."),
-        Recipe(name = "🍕 Minimal-Ingredient Pizza", description = "A simple pizza you can easily make.")
-    )*/
-    val recipes: List<Recipe> by viewModel.allRecipes.observeAsState(emptyList())
+    var selectedFilter by remember { mutableStateOf<TypeOfMeal?>(null) }
 
-    LaunchedEffect(Unit) {
-        viewModel.getAllRecipe()
-    }
+    val recipes: List<Recipe> by viewModel.allRecipes.observeAsState(emptyList())
+    LaunchedEffect(Unit) { viewModel.getAllRecipe() }
+
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(SoftBackground, Color(0xFFFFECB3))
-                )
-            )
+            .background(brush = Brush.verticalGradient(colors = listOf(SoftBackground, Color(0xFFFFECB3))))
     ) {
         Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
             Row(
@@ -75,9 +69,7 @@ fun HomeScreen(navigateToRoute: (String) -> Unit, modifier: Modifier = Modifier,
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
                     placeholder = { Text("Search recipes...") },
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(56.dp),
+                    modifier = Modifier.weight(1f).height(56.dp),
                     shape = RoundedCornerShape(50),
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = Color(0xFFF0F0F0),
@@ -103,8 +95,9 @@ fun HomeScreen(navigateToRoute: (String) -> Unit, modifier: Modifier = Modifier,
             Spacer(Modifier.height(12.dp))
 
             LazyRow {
-                items(filters) { filter ->
-                    val isSelected = filter == selectedFilter
+                items(TypeOfMeal.values()) { type ->
+                    val emoji = typeOfMealEmojis[type] ?: ""
+                    val isSelected = selectedFilter == type
                     Box(
                         modifier = Modifier
                             .padding(end = 8.dp)
@@ -112,11 +105,11 @@ fun HomeScreen(navigateToRoute: (String) -> Unit, modifier: Modifier = Modifier,
                                 if (isSelected) SunnyYellow else Color.White,
                                 CircleShape
                             )
-                            .clickable { selectedFilter = filter }
+                            .clickable { selectedFilter = type }
                             .padding(horizontal = 16.dp, vertical = 8.dp)
                     ) {
                         Text(
-                            filter,
+                            "$emoji ${type.displayText}",
                             color = if (isSelected) Color.Black else Color.DarkGray
                         )
                     }
@@ -131,9 +124,7 @@ fun HomeScreen(navigateToRoute: (String) -> Unit, modifier: Modifier = Modifier,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 8.dp)
-                            .clickable {
-                                navigateToRoute("recipe/${recipe.id}")
-                            },
+                            .clickable { navigateToRoute("recipe/${recipe.id}") },
                         colors = CardDefaults.cardColors(containerColor = Color.White),
                         elevation = CardDefaults.cardElevation(4.dp)
                     ) {
@@ -142,9 +133,7 @@ fun HomeScreen(navigateToRoute: (String) -> Unit, modifier: Modifier = Modifier,
                                 Image(
                                     painter = rememberAsyncImagePainter(uriString),
                                     contentDescription = "Recipe Image",
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(150.dp)
+                                    modifier = Modifier.fillMaxWidth().height(150.dp)
                                 )
                             } ?: run {
                                 Box(
@@ -176,29 +165,48 @@ fun HomeScreen(navigateToRoute: (String) -> Unit, modifier: Modifier = Modifier,
                         tonalElevation = 4.dp
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
-                            FilterSection("🍽 Meal Type", listOf("Breakfast", "Lunch", "Dinner", "Dessert", "Snack"))
+                            // Meal Type from DB
+                            FilterSection(
+                                title = "🍽 Meal Type",
+                                options = TypeOfMeal.values().map {
+                                    val emoji = typeOfMealEmojis[it] ?: ""
+                                    "$emoji ${it.displayText}"
+                                }
+                            )
                             Spacer(Modifier.height(12.dp))
-                            FilterSection("🥗 Diet", listOf("Vegetarian", "Vegan", "Gluten-Free", "Dairy-Free", "Low-Carb", "High-Protein"))
-                            Spacer(Modifier.height(12.dp))
-                            FilterSection("⏱ Time & Difficulty", listOf("Under 15 min", "30 min", "Easy", "Intermediate", "Advanced"))
-                            Spacer(Modifier.height(12.dp))
-                            FilterSection("💸 Budget", listOf("Cheap", "Moderate", "Fancy"))
-                            Spacer(Modifier.height(12.dp))
-                            FilterSection("🧰 Equipment", listOf("No Oven", "No Blender", "One Pot Only"))
-                            Spacer(Modifier.height(12.dp))
-                            FilterSection("💪 Nutrition Goals", listOf("Weight Loss", "Muscle Gain", "Balanced Diet"))
+
+                            // Price Category from DB
+                            FilterSection(
+                                title = "💰 Price Category",
+                                options = PriceCategory.values().map { it.toString() }
+                            )
                             Spacer(Modifier.height(16.dp))
-                            Button(
-                                onClick = { showFilterDialog = false },
-                                colors = ButtonDefaults.buttonColors(containerColor = SunnyYellow),
-                                modifier = Modifier.align(Alignment.End)
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                Text("Apply", color = Color.Black)
+                                Button(
+                                    onClick = {
+                                        // TODO: Clear selected filters here
+                                        showFilterDialog = false
+                                    },
+                                    colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray)
+                                ) {
+                                    Text("Clean", color = Color.Black)
+                                }
+                                Button(
+                                    onClick = { showFilterDialog = false },
+                                    colors = ButtonDefaults.buttonColors(containerColor = SunnyYellow)
+                                ) {
+                                    Text("Apply", color = Color.Black)
+                                }
                             }
                         }
                     }
                 }
             }
+
         }
     }
 }
