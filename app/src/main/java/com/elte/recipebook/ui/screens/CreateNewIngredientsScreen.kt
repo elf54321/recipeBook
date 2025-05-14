@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -13,11 +14,18 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.elte.recipebook.data.entities.Nutrition
+import com.elte.recipebook.ui.theme.SunnyYellow
+import com.elte.recipebook.ui.theme.SoftBackground
 import com.elte.recipebook.viewModel.AddRecipeViewModel
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.TextFieldDefaults
+import com.elte.recipebook.ui.theme.SunnyYellow
+
 
 @SuppressLint("UnrememberedGetBackStackEntry")
 @Composable
@@ -53,6 +61,7 @@ fun CreateNewIngredientsScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
+            .background(SoftBackground)
             .verticalScroll(scrollState)
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -68,6 +77,9 @@ fun CreateNewIngredientsScreen(
             value = name,
             onValueChange = { name = it },
             label = { Text("Name") },
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                focusedBorderColor   = SunnyYellow
+            ),
             modifier = Modifier.fillMaxWidth()
         )
         Row(
@@ -78,12 +90,18 @@ fun CreateNewIngredientsScreen(
                 value = quantity,
                 onValueChange = { quantity = it },
                 label = { Text("Quantity") },
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor   = SunnyYellow
+                ),
                 modifier = Modifier.weight(1f)
             )
             OutlinedTextField(
                 value = unit,
                 onValueChange = { unit = it },
                 label = { Text("Unit") },
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor   = SunnyYellow
+                ),
                 modifier = Modifier.weight(1f)
             )
         }
@@ -95,12 +113,18 @@ fun CreateNewIngredientsScreen(
                 value = price,
                 onValueChange = { price = it },
                 label = { Text("Price") },
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor   = SunnyYellow
+                ),
                 modifier = Modifier.weight(1f)
             )
             OutlinedTextField(
                 value = currency,
                 onValueChange = { currency = it },
                 label = { Text("Currency") },
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor   = SunnyYellow
+                ),
                 modifier = Modifier.weight(1f)
             )
         }
@@ -120,42 +144,63 @@ fun CreateNewIngredientsScreen(
                 value = energy,
                 onValueChange = { energy = it },
                 label = { Text("Energy (kcal)") },
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor   = SunnyYellow
+                ),
                 modifier = Modifier.fillMaxWidth()
             )
             OutlinedTextField(
                 value = fat,
                 onValueChange = { fat = it },
                 label = { Text("Fat (g)") },
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor   = SunnyYellow
+                ),
                 modifier = Modifier.fillMaxWidth()
             )
             OutlinedTextField(
                 value = protein,
                 onValueChange = { protein = it },
                 label = { Text("Protein (g)") },
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor   = SunnyYellow
+                ),
                 modifier = Modifier.fillMaxWidth()
             )
             OutlinedTextField(
                 value = carbohydrate,
                 onValueChange = { carbohydrate = it },
                 label = { Text("Carbs (g)") },
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor   = SunnyYellow
+                ),
                 modifier = Modifier.fillMaxWidth()
             )
             OutlinedTextField(
                 value = sugar,
                 onValueChange = { sugar = it },
                 label = { Text("Sugar (g)") },
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor   = SunnyYellow
+                ),
                 modifier = Modifier.fillMaxWidth()
             )
             OutlinedTextField(
                 value = salt,
                 onValueChange = { salt = it },
                 label = { Text("Salt (g)") },
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor   = SunnyYellow
+                ),
                 modifier = Modifier.fillMaxWidth()
             )
             OutlinedTextField(
                 value = fiber,
                 onValueChange = { fiber = it },
                 label = { Text("Fiber (g)") },
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor   = SunnyYellow
+                ),
                 modifier = Modifier.fillMaxWidth()
             )
         }
@@ -185,10 +230,11 @@ fun CreateNewIngredientsScreen(
                 onIngredientCreated()
             },
             modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp)
+                .align(Alignment.CenterHorizontally)
+                .padding(vertical = 8.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = SunnyYellow)
         ) {
-            Text(text = "Save Ingredient")
+            Text(text = "Save Ingredient",color = Color.Black)
         }
     }
 }

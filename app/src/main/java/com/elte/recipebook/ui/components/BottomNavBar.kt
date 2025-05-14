@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.elte.recipebook.ui.theme.SunnyYellow
 
 data class BottomNavItem(val route: String, val icon: ImageVector, val label: String)
 
@@ -37,7 +38,16 @@ fun BottomNavBar(navController: NavHostController, currentRoute: String?) {
                             restoreState = true
                         }
                     }
-                }
+                },
+                colors = NavigationBarItemDefaults.colors(
+                    // icon & text when selected/unselected
+                    selectedIconColor   = SunnyYellow,
+                    unselectedIconColor = Color.Black,
+                    selectedTextColor   = SunnyYellow,
+                    unselectedTextColor = Color.Black,
+                    // the little pill behind the selected item
+                    indicatorColor      = SunnyYellow.copy(alpha = 0.2f)
+                )
             )
         }
     }

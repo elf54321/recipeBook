@@ -1,10 +1,6 @@
 package com.elte.recipebook.ui.screens
 
 import android.annotation.SuppressLint
-import android.net.Uri
-import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -25,15 +21,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toUri
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import coil.compose.rememberAsyncImagePainter
-import com.elte.recipebook.data.Equipment
-import com.elte.recipebook.ui.theme.DeepText
+import androidx.compose.material3.TextFieldDefaults
 import com.elte.recipebook.ui.theme.SoftBackground
 import com.elte.recipebook.ui.theme.SunnyYellow
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import com.elte.recipebook.ui.theme.DeepText
 import com.elte.recipebook.viewModel.AddRecipeViewModel
 
 import kotlinx.coroutines.TimeoutCancellationException
@@ -77,7 +74,7 @@ fun AddRecipeDetailScreen(
         Box(
             modifier = modifier
                 .fillMaxSize()
-                .background(Color(0xFFF7F4EF))
+                .background(SoftBackground)
         ) {
             Column(
                 modifier = Modifier
@@ -88,6 +85,7 @@ fun AddRecipeDetailScreen(
                 Text(
                     text = "🍽️ Recipe Details",
                     style = MaterialTheme.typography.headlineSmall,
+                    color = DeepText,
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
 
@@ -95,11 +93,18 @@ fun AddRecipeDetailScreen(
                     value = portionText,
                     onValueChange = viewModel::onPortionChange,
                     label = { Text("Portion (number)") },
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor   = Color.White,
+                        unfocusedContainerColor = Color.White,
+                        disabledContainerColor  = Color.White,
+                        focusedIndicatorColor   = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        disabledIndicatorColor  = Color.Transparent),
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                // Dropdown for TypeOfMeal
+                // Dropdown for Type of Meal
                 ExposedDropdownMenuBox(
                     expanded = viewModel.isTypeMenuExpanded,
                     onExpandedChange = { viewModel.toggleTypeMenu() }
@@ -108,26 +113,49 @@ fun AddRecipeDetailScreen(
                         value = selectedType.name,
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Type of Meal") },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = viewModel.isTypeMenuExpanded) },
-                        modifier = Modifier.menuAnchor().fillMaxWidth()
+                        label = { Text("Type of Meal", color = DeepText) },
+                        trailingIcon = {
+                            ExposedDropdownMenuDefaults.TrailingIcon(
+                                expanded = viewModel.isTypeMenuExpanded
+                            )
+                        },
+                        colors = ExposedDropdownMenuDefaults.textFieldColors(
+                            cursorColor          = DeepText,
+                            // Label / placeholder
+                            focusedLabelColor    = SoftBackground,
+                            unfocusedLabelColor  = SoftBackground,
+                            // Container
+                            focusedContainerColor    = SoftBackground,
+                            unfocusedContainerColor  = SoftBackground,
+                            disabledContainerColor   = SoftBackground,
+                            // Indicator (outline)
+                            focusedIndicatorColor    = SunnyYellow,
+
+                        ),
+                        modifier = Modifier
+                            .menuAnchor()
+                            .fillMaxWidth()
                     )
                     ExposedDropdownMenu(
                         expanded = viewModel.isTypeMenuExpanded,
-                        onDismissRequest = { viewModel.toggleTypeMenu() }
+                        onDismissRequest = { viewModel.toggleTypeMenu() },
+                        modifier = Modifier
+                            .background(SoftBackground)              // paint the menu itself
                     ) {
                         types.forEach { type ->
                             DropdownMenuItem(
-                                text = { Text(type.name) },
+                                text = { Text(type.name, color = DeepText) }, // menu text
                                 onClick = {
                                     viewModel.onTypeSelected(type)
                                     viewModel.toggleTypeMenu()
-                                }
+                                },
+                                modifier = Modifier.background(SoftBackground)     // each item bg
                             )
                         }
                     }
                 }
-                // Dropdown for PriceCategory
+
+                // Dropdown for Price Category
                 ExposedDropdownMenuBox(
                     expanded = viewModel.isPriceMenuExpanded,
                     onExpandedChange = { viewModel.togglePriceMenu() }
@@ -136,21 +164,43 @@ fun AddRecipeDetailScreen(
                         value = selectedPrice.name,
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Price Category") },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = viewModel.isPriceMenuExpanded) },
-                        modifier = Modifier.menuAnchor().fillMaxWidth()
+                        label = { Text("Price Category", color = DeepText) },
+                        trailingIcon = {
+                            ExposedDropdownMenuDefaults.TrailingIcon(
+                                expanded = viewModel.isPriceMenuExpanded
+                            )
+                        },
+                        colors = ExposedDropdownMenuDefaults.textFieldColors(
+                            cursorColor             = DeepText,
+                            // Label / placeholder
+                            focusedLabelColor       = SoftBackground,
+                            unfocusedLabelColor     = SoftBackground,
+                            // Container
+                            focusedContainerColor   = SoftBackground,
+                            unfocusedContainerColor = SoftBackground,
+                            disabledContainerColor  = SoftBackground,
+                            // Indicator (outline)
+                            focusedIndicatorColor   = SunnyYellow
+                        ),
+                        modifier = Modifier
+                            .menuAnchor()
+                            .fillMaxWidth()
                     )
+
                     ExposedDropdownMenu(
                         expanded = viewModel.isPriceMenuExpanded,
-                        onDismissRequest = { viewModel.togglePriceMenu() }
+                        onDismissRequest = { viewModel.togglePriceMenu() },
+                        modifier = Modifier
+                            .background(SoftBackground)  // paint the menu itself
                     ) {
                         prices.forEach { pc ->
                             DropdownMenuItem(
-                                text = { Text(pc.name) },
+                                text = { Text(pc.name, color = DeepText) }, // item text color
                                 onClick = {
                                     viewModel.onPriceCategorySelected(pc)
                                     viewModel.togglePriceMenu()
-                                }
+                                },
+                                modifier = Modifier.background(SoftBackground) // each item bg
                             )
                         }
                     }
@@ -216,7 +266,9 @@ fun AddRecipeDetailScreen(
                     // The pop-up menu with checkboxes
                     ExposedDropdownMenu(
                         expanded = showEquipmentDialog,
-                        onDismissRequest = { showEquipmentDialog = false }
+                        onDismissRequest = { showEquipmentDialog = false },
+                        modifier = Modifier
+                            .background(SoftBackground)
                     ) {
                         equipmentOptions.forEach { eq ->
                             val isSelected = selectedEquipment.contains(eq)
@@ -226,11 +278,21 @@ fun AddRecipeDetailScreen(
                                     viewModel.toggleEquipment(eq)
                                 },
                                 enabled = isSelected || canSelectMore,
+                                modifier = Modifier.background(SoftBackground),
                                 text = {
                                     Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Checkbox(checked = isSelected, onCheckedChange = null)
+                                        Checkbox(checked = isSelected,
+                                            onCheckedChange = null,
+                                            colors = CheckboxDefaults.colors(
+                                                // box fill when checked
+                                                checkedColor     = SoftBackground,
+                                                // checkmark stroke
+                                                checkmarkColor   = SunnyYellow,
+                                                // box border when unchecked
+                                                uncheckedColor   = DeepText.copy(alpha = 0.6f)
+                                        ))
                                         Spacer(Modifier.width(8.dp))
-                                        Text(eq.name)
+                                        Text(eq.name, color = DeepText)
                                     }
                                 }
                             )
@@ -246,9 +308,10 @@ fun AddRecipeDetailScreen(
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(50.dp)
+                        .height(50.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = SunnyYellow)
                 ) {
-                    Text("Add Ingredients")
+                    Text("Next", color = Color.Black)
                 }
             }
         }
