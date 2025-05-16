@@ -199,7 +199,57 @@ class AddRecipeViewModel @Inject constructor(
     // --------------------------------------------------------------------------//
     //                        Ingredient - Nutrition Part                        //
     // --------------------------------------------------------------------------//
-    fun createIngredient(
+    fun onSaveIngredient(
+        name: String,
+        quantityStr: String,
+        unit: String,
+        priceStr: String,
+        currency: String,
+        energyStr: String,
+        fatStr: String,
+        proteinStr: String,
+        carbStr: String,
+        sugarStr: String,
+        saltStr: String,
+        fiberStr: String
+    ) {
+        // Basic required checks
+        if (name.length !in 1..30 ||
+            unit.isBlank() ||
+            quantityStr.toDoubleOrNull() == null ||
+            priceStr.toDoubleOrNull() == null ||
+            currency.isBlank()
+        ) {
+            return  // bail out if any required field is bad
+        }
+
+        // Build Nutrition object (missing values default to zero)
+        val nutrition = Nutrition(
+            energy       = energyStr.toIntOrNull()   ?: 0,
+            fat          = fatStr.toDoubleOrNull()   ?: 0.0,
+            protein      = proteinStr.toDoubleOrNull() ?: 0.0,
+            carbohydrate = carbStr.toDoubleOrNull()  ?: 0.0,
+            sugar        = sugarStr.toDoubleOrNull() ?: 0.0,
+            salt         = saltStr.toDoubleOrNull()  ?: 0.0,
+            fiber        = fiberStr.toDoubleOrNull() ?: 0.0
+        )
+
+        // Delegate to your DAO-backed saver
+        createIngredient(
+            name     = name.trim(),
+            price    = priceStr.toDouble(),
+            currency = currency.trim(),
+            quantity = quantityStr.toDouble(),
+            unit     = unit.trim(),
+            nutrition = nutrition
+        )
+    }
+
+    /**
+     * Inserts Nutrition, then Ingredient, and finally
+     * updates the in-memory selected list.
+     */
+    private fun createIngredient(
         name: String,
         price: Double,
         currency: String,
