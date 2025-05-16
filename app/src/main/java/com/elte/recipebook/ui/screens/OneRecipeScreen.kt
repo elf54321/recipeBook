@@ -257,11 +257,25 @@ fun OneRecipeScreen(
                                         .padding(vertical = 4.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
+                                    var quantityText by remember(ingredient.quantity) {
+                                        mutableStateOf(
+                                            if (ingredient.quantity == 0.0) ""
+                                            else if (ingredient.quantity % 1 == 0.0) ingredient.quantity.toInt().toString()
+                                            else ingredient.quantity.toString()
+                                        )
+                                    }
                                     OutlinedTextField(
-                                        value = ingredient.quantity.toString(),
-                                        onValueChange = {
-                                            editedIngredients[index] =
-                                                ingredient.copy(quantity = it.toDouble())
+                                        value = quantityText,
+                                        onValueChange = { newValue ->
+                                            if (newValue.matches(Regex("^\\d*\\.?\\d*\$")) &&
+                                                newValue.count { it == '.' } <= 1) {
+                                                quantityText = newValue
+                                                val quantity = when {
+                                                    newValue.isEmpty() -> 0.0
+                                                    else -> newValue.toDoubleOrNull() ?: ingredient.quantity
+                                                }
+                                                editedIngredients[index] = ingredient.copy(quantity = quantity)
+                                            }
                                         },
                                         label = { Text("Qty") },
                                         modifier = Modifier.weight(1f)
@@ -325,7 +339,9 @@ fun OneRecipeScreen(
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
                                     Text(
-                                        ingredient.quantity.toString(),
+                                        if (ingredient.quantity == 0.0) ""
+                                        else if (ingredient.quantity % 1 == 0.0) ingredient.quantity.toInt().toString()
+                                        else ingredient.quantity.toString(),
                                         modifier = Modifier.weight(1f)
                                     )
                                     Text(

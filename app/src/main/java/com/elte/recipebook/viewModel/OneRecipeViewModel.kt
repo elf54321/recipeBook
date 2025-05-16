@@ -69,6 +69,12 @@ class OneRecipeViewModel(application: Application) : AndroidViewModel(applicatio
             recipeDao.deleteCrossRefsByRecipeId(recipeId)
 
             updatedIngredients.forEach { ingredient ->
+                val existing = selectedIngredients.find { it.id == ingredient.id }
+                if (existing != null)
+                    ingredientDao.update(ingredient)
+                else
+                    ingredientDao.insert(ingredient)
+
                 val crossRef = RecipeIngredientCrossRef(recipeId, ingredient.id)
                 recipeDao.insertRecipeIngredientCrossRef(crossRef)
             }
