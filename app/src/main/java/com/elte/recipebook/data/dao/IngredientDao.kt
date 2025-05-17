@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import com.elte.recipebook.data.entities.Ingredient
 import kotlinx.coroutines.flow.Flow
 
@@ -14,4 +15,7 @@ interface IngredientDao {
 
     @Query("SELECT * FROM ingredient")
     fun getAllIngredients(): Flow<List<Ingredient>>
+
+    @Update
+    suspend fun update(ingredient: Ingredient)
 }
