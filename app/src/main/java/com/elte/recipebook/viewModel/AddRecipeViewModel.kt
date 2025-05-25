@@ -35,7 +35,8 @@ import javax.inject.Inject
 class AddRecipeViewModel @Inject constructor(
     private val recipeDao: RecipeDao,
     private val ingredientDao: IngredientDao,
-    private val nutritionDao: NutritionDao
+    private val nutritionDao: NutritionDao,
+    val shoppingListManager: ShoppingListManager
 ) : ViewModel() {
     // --------------------------------------------------------------------------//
     // --------------------------------------------------------------------------//
@@ -187,6 +188,7 @@ class AddRecipeViewModel @Inject constructor(
 
             // 6) Reset form & call success callback
             resetForm()
+            shoppingListManager.addIngredients(selectedIngredients.toList())
             onSuccess()
         }
     }

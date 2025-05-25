@@ -157,8 +157,15 @@ fun OneRecipeScreen(
 
                     Button(
                         onClick = {
-                            shoppingListManager.addIngredients(ingredients.map { it.ingredient })
-                            navController.navigate("grocery")
+                            val validIngredients = ingredients.map { it.ingredient }.filter { it.name.isNotBlank() }
+
+                            if (validIngredients.isNotEmpty()) {
+                                shoppingListManager.addIngredients(validIngredients)
+                                Toast.makeText(context, "Added ${validIngredients.size} items to grocery list", Toast.LENGTH_SHORT).show()
+                                navController.navigate("grocery")
+                            } else {
+                                Toast.makeText(context, "No ingredients to add!", Toast.LENGTH_SHORT).show()
+                            }
                         },
                         modifier = Modifier.wrapContentWidth(),
                         colors = ButtonDefaults.buttonColors(
@@ -168,6 +175,7 @@ fun OneRecipeScreen(
                     ) {
                         Text("Add to Grocery List")
                     }
+
 
                     Box(
                         modifier = Modifier.weight(1f),

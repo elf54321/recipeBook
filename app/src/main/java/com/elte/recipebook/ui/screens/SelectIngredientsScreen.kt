@@ -126,6 +126,7 @@ fun SelectIngredientsScreen(
                 // Tell the VM to insert the recipe (and its cross-refs)
                 viewModel.insertRecipe {
                     // If successful, onDone callback being called
+                    viewModel.shoppingListManager.addIngredients(viewModel.selectedIngredients.toList())
                     onDone()
                 }
             },
