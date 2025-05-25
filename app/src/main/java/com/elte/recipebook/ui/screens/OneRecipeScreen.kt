@@ -54,6 +54,9 @@ import com.mr0xf00.easycrop.rememberImageCropper
 import com.mr0xf00.easycrop.ui.ImageCropperDialog
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import android.speech.tts.TextToSpeech
+import android.speech.tts.UtteranceProgressListener
+import java.util.*
 import java.io.File
 
 @Composable
@@ -76,7 +79,31 @@ fun OneRecipeScreen(
     var editedTitle by remember { mutableStateOf("") }
     var editedDescription by remember { mutableStateOf("") }
     var editedImageUri by remember { mutableStateOf<String?>(null) }
+    val tts = remember { TextToSpeech(context, null) }
+    var isSpeaking by remember { mutableStateOf(false) }
 
+
+    DisposableEffect(Unit) {
+        tts.language = Locale.getDefault()
+        tts.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
+            override fun onStart(utteranceId: String?) {
+                isSpeaking = true
+            }
+
+            override fun onDone(utteranceId: String?) {
+                isSpeaking = false
+            }
+
+            override fun onError(utteranceId: String?) {
+                isSpeaking = false
+            }
+        })
+
+        onDispose {
+            tts.stop()
+            tts.shutdown()
+        }
+    }
     LaunchedEffect(ingredients) {
         editedIngredients.clear()
         editedIngredients.addAll(ingredients.map { it.ingredient.copy() })
@@ -291,6 +318,21 @@ fun OneRecipeScreen(
                     } else {
                         Text(it.name, style = MaterialTheme.typography.headlineSmall)
                         Text(it.description, style = MaterialTheme.typography.bodyMedium)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Button(
+                            onClick = {
+                                if (isSpeaking) {
+                                    tts.stop()
+                                    isSpeaking = false
+                                } else {
+                                    val desc = recipe?.description ?: "No description available"
+                                    tts.speak(desc, TextToSpeech.QUEUE_FLUSH, null, "desc_speech")
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = SunnyYellow)
+                        ) {
+                            Text(if (isSpeaking) "Stop Reading" else "Read Aloud")
+                        }
                     }
 
                     Column(
