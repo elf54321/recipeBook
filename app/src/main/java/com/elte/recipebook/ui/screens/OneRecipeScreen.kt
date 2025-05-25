@@ -91,100 +91,70 @@ fun OneRecipeScreen(
     val sharedViewModel: ShoppingListViewModel = hiltViewModel()
     val shoppingListManager = sharedViewModel.shoppingListManager
 
-    val scrollState = rememberScrollState()
-
     Box(
         modifier = modifier
             .fillMaxSize()
+            .padding(horizontal = 12.dp)
             .background(SoftBackground)
+            .verticalScroll(rememberScrollState()) // This will make the column scrollable
 
     ) {
         recipe?.let {
-            Column(
-                modifier = Modifier
-                    .verticalScroll(scrollState)
-                    .padding(horizontal = 12.dp, vertical = 16.dp)
-            ) {
-                // Top row: edit (±cancel) | add to grocery | delete
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier.weight(1f),
-                        contentAlignment = Alignment.CenterStart
-                    ) {
-                        Row {
-                            IconButton(onClick = {
-                                if (isEditing) {
-                                    viewModel.updateRecipeDetails(
-                                        recipeId,
-                                        editedTitle,
-                                        editedDescription,
-                                        editedImageUri,
-                                        editedIngredients.toList()
-                                    )
-                                }
-                                isEditing = !isEditing
-                            }) {
-                                Icon(
-                                    imageVector = if (isEditing) Icons.Default.Check else Icons.Default.Edit,
-                                    contentDescription = if (isEditing) "Save" else "Edit",
-                                    tint = Color.Black
-                                )
-                            }
-                            if (isEditing) {
-                                IconButton(onClick = {
-                                    // reset fields
-                                    editedTitle = it.name
-                                    editedDescription = it.description
-                                    editedImageUri = it.imageUri
-                                    editedIngredients.clear()
-                                    editedIngredients.addAll(ingredients.map { ing -> ing.ingredient.copy() })
-                                    isEditing = false
-                                }) {
-                                    Icon(
-                                        imageVector = Icons.Default.Close,
-                                        contentDescription = "Cancel Edit",
-                                        tint = Color.Black
-                                    )
-                                }
-                            }
-                        }
-                    }
-
-                    Button(
-                        onClick = {
-                            shoppingListManager.addIngredients(ingredients.map { it.ingredient })
-                            navController.navigate("grocery")
-                        },
-                        modifier = Modifier.wrapContentWidth(),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = SunnyYellow,
-                            contentColor = Color.Black
-                        ),
-                    ) {
-                        Text("Add to Grocery List")
-                    }
-
-                    Box(
-                        modifier = Modifier.weight(1f),
-                        contentAlignment = Alignment.CenterEnd
-                    ) {
-                        IconButton(onClick = { showDeleteDialog = true }) {
-                            Icon(
-                                imageVector = Icons.Default.Delete,
-                                contentDescription = "Delete Recipe",
-                                tint = Color.Black
+            Box(modifier = Modifier.fillMaxSize()) {
+                IconButton(
+                    onClick = {
+                        if (isEditing) {
+                            viewModel.updateRecipeDetails(
+                                recipeId,
+                                editedTitle,
+                                editedDescription,
+                                editedImageUri,
+                                editedIngredients.toList()
                             )
                         }
+                        isEditing = !isEditing
+                    },
+                    modifier = Modifier.align(Alignment.TopStart)
+                ) {
+                    Icon(
+                        imageVector = if (isEditing) Icons.Default.Check else Icons.Default.Edit,
+                        contentDescription = if (isEditing) "Save" else "Edit",
+                        tint = Color.Black
+                    )
+                }
+                if (isEditing) {
+                    IconButton(
+                        onClick = {
+                            editedTitle = it.name
+                            editedDescription = it.description
+                            editedImageUri = it.imageUri
+                            editedIngredients.clear()
+                            editedIngredients.addAll(ingredients.map { it.ingredient.copy() })
+                            isEditing = false
+                        },
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .padding(40.dp, 0.dp, 0.dp, 0.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Cancel Edit",
+                            tint = Color.Black
+                        )
                     }
                 }
 
-
-
+                IconButton(
+                    onClick = { showDeleteDialog = true },
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Delete Recipe",
+                        tint = Color.Black
+                    )
+                }
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -217,11 +187,7 @@ fun OneRecipeScreen(
                     }
                     if (isEditing) {
                         Button(
-                            onClick = { launcher.launch("image/*") },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = SunnyYellow,
-                                contentColor = Color.Black
-                            )
+                            onClick = { launcher.launch("image/*") }
                         ) {
                             Text("Change Image")
                         }
@@ -257,25 +223,11 @@ fun OneRecipeScreen(
                                         .padding(vertical = 4.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    var quantityText by remember(ingredient.quantity) {
-                                        mutableStateOf(
-                                            if (ingredient.quantity == 0.0) ""
-                                            else if (ingredient.quantity % 1 == 0.0) ingredient.quantity.toInt().toString()
-                                            else ingredient.quantity.toString()
-                                        )
-                                    }
                                     OutlinedTextField(
-                                        value = quantityText,
-                                        onValueChange = { newValue ->
-                                            if (newValue.matches(Regex("^\\d*\\.?\\d*\$")) &&
-                                                newValue.count { it == '.' } <= 1) {
-                                                quantityText = newValue
-                                                val quantity = when {
-                                                    newValue.isEmpty() -> 0.0
-                                                    else -> newValue.toDoubleOrNull() ?: ingredient.quantity
-                                                }
-                                                editedIngredients[index] = ingredient.copy(quantity = quantity)
-                                            }
+                                        value = ingredient.quantity.toString(),
+                                        onValueChange = {
+                                            editedIngredients[index] =
+                                                ingredient.copy(quantity = it.toDouble())
                                         },
                                         label = { Text("Qty") },
                                         modifier = Modifier.weight(1f)
@@ -306,21 +258,13 @@ fun OneRecipeScreen(
                             ) {
                                 Button(
                                     onClick = { showIngredientPopup = true },
-                                    modifier = Modifier.weight(1f),
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = SunnyYellow,
-                                        contentColor = Color.Black
-                                    ),
+                                    modifier = Modifier.weight(1f)
                                 ) {
                                     Text("New Ingredient")
                                 }
                                 Button(
                                     onClick = { showAddExistingIngredientPopup = true },
-                                    modifier = Modifier.weight(1f),
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = SunnyYellow,
-                                        contentColor = Color.Black
-                                    ),
+                                    modifier = Modifier.weight(1f)
                                 ) {
                                     Text("Edit Existing")
                                 }
@@ -339,9 +283,7 @@ fun OneRecipeScreen(
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
                                     Text(
-                                        if (ingredient.quantity == 0.0) ""
-                                        else if (ingredient.quantity % 1 == 0.0) ingredient.quantity.toInt().toString()
-                                        else ingredient.quantity.toString(),
+                                        ingredient.quantity.toString(),
                                         modifier = Modifier.weight(1f)
                                     )
                                     Text(
@@ -436,7 +378,6 @@ fun OneRecipeScreen(
         if (showAddExistingIngredientPopup) {
             Dialog(onDismissRequest = { showAddExistingIngredientPopup = false }) {
                 Surface(
-                    color = SoftBackground,
                     shape = RoundedCornerShape(12.dp),
                     tonalElevation = 8.dp,
                     modifier = Modifier
@@ -493,6 +434,19 @@ fun OneRecipeScreen(
                     }
                 }
             }
+        }
+
+        Button(
+            onClick = {
+                shoppingListManager.addIngredients(ingredients.map { i -> i.ingredient })
+                navController.navigate("grocery")
+            },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = SunnyYellow,
+                contentColor = Color.Black
+            ),
+        ) {
+            Text("Add to Grocery List", color = Color.Black)
         }
     }
 }
