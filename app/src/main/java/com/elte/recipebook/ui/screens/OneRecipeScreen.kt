@@ -1,6 +1,9 @@
 package com.elte.recipebook.ui.screens
 
+import android.content.Context
+import android.graphics.Bitmap
 import android.net.Uri
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -30,9 +33,13 @@ import coil.compose.rememberAsyncImagePainter
 import com.elte.recipebook.viewModel.OneRecipeViewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.zIndex
+import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -40,11 +47,18 @@ import com.elte.recipebook.data.entities.Ingredient
 import com.elte.recipebook.ui.theme.SoftBackground
 import com.elte.recipebook.ui.theme.SunnyYellow
 import com.elte.recipebook.viewModel.ShoppingListViewModel
+import com.mr0xf00.easycrop.CropError
+import com.mr0xf00.easycrop.CropResult
+import com.mr0xf00.easycrop.crop
+import com.mr0xf00.easycrop.rememberImageCropper
+import com.mr0xf00.easycrop.ui.ImageCropperDialog
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import java.util.*
+import java.io.File
+
 @Composable
 fun OneRecipeScreen(
     recipeId: Int,
@@ -109,11 +123,46 @@ fun OneRecipeScreen(
     var showAddExistingIngredientPopup by remember { mutableStateOf(false) }
     var isEditing by remember { mutableStateOf(false) }
 
-    val launcher = rememberLauncherForActivityResult(
+    val scope = rememberCoroutineScope()
+    val imageCropper = rememberImageCropper()
+    var isProcessing by remember { mutableStateOf(false) }
+
+    fun saveBitmapToCacheFile(context: Context, bitmap: Bitmap): Uri {
+        val file = File(context.cacheDir, "cropped_image_${System.currentTimeMillis()}.png")
+        file.outputStream().use {
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
+        }
+        return FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.provider",
+            file
+        )
+    }
+
+    val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
-        editedImageUri = uri.toString()
+        uri?.let {
+            scope.launch {
+                val result = imageCropper.crop(uri, context)
+                when (result) {
+                    is CropResult.Success -> {
+                        val croppedBitmap = result.bitmap.asAndroidBitmap()
+                        val imageUri = saveBitmapToCacheFile(context, croppedBitmap)
+                        editedImageUri = imageUri.toString()
+                    }
+                    is CropResult.Cancelled -> {
+                        Log.d("OcrScreen", "Cropping cancelled")
+                    }
+                    is CropError -> {
+                        Log.e("OcrScreen", "Cropping error: ${result.name}")
+                    }
+                }
+            }
+        }
     }
+
+
     val sharedViewModel: ShoppingListViewModel = hiltViewModel()
     val shoppingListManager = sharedViewModel.shoppingListManager
 
@@ -251,11 +300,12 @@ fun OneRecipeScreen(
                     }
                     if (isEditing) {
                         Button(
-                            onClick = { launcher.launch("image/*") },
+                            onClick = { imagePickerLauncher.launch("image/*") },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = SunnyYellow,
                                 contentColor = Color.Black
-                            )
+                            ),
+                            enabled = !isProcessing
                         ) {
                             Text("Change Image")
                         }
@@ -459,6 +509,20 @@ fun OneRecipeScreen(
                     }
                 }
             )
+        }
+        if (isProcessing) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.5f))
+                    .zIndex(1f),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(color = Color.White)
+            }
+        }
+        imageCropper.cropState?.let { cropState ->
+            ImageCropperDialog(state = cropState)
         }
         if (showIngredientPopup) {
             Dialog(onDismissRequest = { showIngredientPopup = false }) {
