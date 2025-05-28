@@ -326,6 +326,20 @@ fun OneRecipeScreen(
                     } else {
                         Text(it.name, style = MaterialTheme.typography.headlineSmall)
                         Text(it.description, style = MaterialTheme.typography.bodyMedium)
+                        if (it.equipment.isNotEmpty()) {
+                            Text(
+                                text = "Equipment: " + it.equipment.joinToString(", ") { eq ->
+                                    eq.name
+                                        .lowercase()
+                                        .replaceFirstChar { char ->
+                                            char.uppercaseChar().toString()
+                                        }
+                                },
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier
+                                    .padding(vertical = 4.dp)
+                            )
+                        }
                         Spacer(modifier = Modifier.height(8.dp))
                         Button(
                             onClick = {
