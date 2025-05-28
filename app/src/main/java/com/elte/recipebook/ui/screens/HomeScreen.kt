@@ -50,10 +50,35 @@ fun HomeScreen(
 ) {
     var searchQuery by remember { mutableStateOf(TextFieldValue("")) }
     var showFilterDialog by remember { mutableStateOf(false) }
+
     var selectedFilter by remember { mutableStateOf<TypeOfMeal?>(null) }
+    var selectedPriceFilter by remember { mutableStateOf<PriceCategory?>(null) }
+
+    var tempTypeFilter by remember { mutableStateOf<TypeOfMeal?>(null) }
+    var tempPriceFilter by remember { mutableStateOf<PriceCategory?>(null) }
+
+    LaunchedEffect(showFilterDialog) {
+        if (showFilterDialog) {
+            tempTypeFilter = selectedFilter
+            tempPriceFilter = selectedPriceFilter
+        }
+    }
 
     val recipes: List<Recipe> by viewModel.allRecipes.observeAsState(emptyList())
     LaunchedEffect(Unit) { viewModel.getAllRecipe() }
+
+    val filteredRecipes = remember(recipes, searchQuery, selectedFilter, selectedPriceFilter) {
+        recipes.filter { recipe ->
+            val matchesSearch = searchQuery.text.isBlank() ||
+                    recipe.name.contains(searchQuery.text, ignoreCase = true) ||
+                    recipe.description.contains(searchQuery.text, ignoreCase = true)
+            val matchesType = selectedFilter == null || recipe.typeOfMeal == selectedFilter
+            val matchesPrice = selectedPriceFilter == null || recipe.priceCategory == selectedPriceFilter
+
+            matchesSearch && matchesType && matchesPrice
+        }
+    }
+
 
     Box(
         modifier = modifier
@@ -119,7 +144,7 @@ fun HomeScreen(
             Spacer(Modifier.height(16.dp))
 
             LazyColumn {
-                items(recipes) { recipe ->
+                items(filteredRecipes) { recipe ->
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -165,38 +190,85 @@ fun HomeScreen(
                         tonalElevation = 4.dp
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
-                            // Meal Type from DB
-                            FilterSection(
-                                title = "🍽 Meal Type",
-                                options = TypeOfMeal.values().map {
-                                    val emoji = typeOfMealEmojis[it] ?: ""
-                                    "$emoji ${it.displayText}"
+                            // ── Meal Type Picker ─────────────────────
+                            Text("🍽 Meal Type", style = MaterialTheme.typography.titleSmall)
+                            Spacer(Modifier.height(8.dp))
+                            LazyRow {
+                                items(TypeOfMeal.values()) { type ->
+                                    val emoji = typeOfMealEmojis[type] ?: ""
+                                    val isSelected = tempTypeFilter == type
+                                    Box(
+                                        modifier = Modifier
+                                            .padding(end = 8.dp)
+                                            .background(
+                                                if (isSelected) SunnyYellow else Color.White,
+                                                CircleShape
+                                            )
+                                            .clickable {
+                                                tempTypeFilter = if (isSelected) null else type
+                                            }
+                                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                                    ) {
+                                        Text(
+                                            "$emoji ${type.displayText}",
+                                            color = if (isSelected) Color.Black else Color.DarkGray
+                                        )
+                                    }
                                 }
-                            )
-                            Spacer(Modifier.height(12.dp))
+                            }
 
-                            // Price Category from DB
-                            FilterSection(
-                                title = "💰 Price Category",
-                                options = PriceCategory.values().map { it.toString() }
-                            )
                             Spacer(Modifier.height(16.dp))
 
+                            // ── Price Category Picker ─────────────────
+                            Text("💰 Price Category", style = MaterialTheme.typography.titleSmall)
+                            Spacer(Modifier.height(8.dp))
+                            LazyRow {
+                                items(PriceCategory.values()) { price ->
+                                    val isSelected = tempPriceFilter == price
+                                    Box(
+                                        modifier = Modifier
+                                            .padding(end = 8.dp)
+                                            .background(
+                                                if (isSelected) SunnyYellow else Color.White,
+                                                CircleShape
+                                            )
+                                            .clickable {
+                                                tempPriceFilter = if (isSelected) null else price
+                                            }
+                                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                                    ) {
+                                        Text(
+                                            price.name,
+                                            color = if (isSelected) Color.Black else Color.DarkGray
+                                        )
+                                    }
+                                }
+                            }
+
+                            Spacer(Modifier.height(24.dp))
+
+                            // ── Actions ──────────────────────────────
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Button(
                                     onClick = {
-                                        // TODO: Clear selected filters here
-                                        showFilterDialog = false
+                                        // reset the dialog picks
+                                        tempTypeFilter = null
+                                        tempPriceFilter = null
                                     },
                                     colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray)
                                 ) {
                                     Text("Clean", color = Color.Black)
                                 }
                                 Button(
-                                    onClick = { showFilterDialog = false },
+                                    onClick = {
+                                        // commit to the real filters
+                                        selectedFilter = tempTypeFilter
+                                        selectedPriceFilter = tempPriceFilter
+                                        showFilterDialog = false
+                                    },
                                     colors = ButtonDefaults.buttonColors(containerColor = SunnyYellow)
                                 ) {
                                     Text("Apply", color = Color.Black)
@@ -206,6 +278,7 @@ fun HomeScreen(
                     }
                 }
             }
+
 
         }
     }
